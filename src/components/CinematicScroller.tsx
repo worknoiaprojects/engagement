@@ -424,14 +424,17 @@ export const CinematicScroller: React.FC = () => {
 
     const actionToRun = shouldExecuteAction ? pendingAction.execute : null;
 
+    // Execute user-gesture-dependent action (navigator.share, window.open, download)
+    // synchronously so browser security permits the share dialog without delay
+    if (actionToRun) {
+      actionToRun();
+    }
+
     setTimeout(() => {
       setPendingAction(null);
       setIsClosing(false);
       setClickOrigin(null);
       isClosingRef.current = false;
-      if (actionToRun) {
-        actionToRun();
-      }
     }, 450);
   };
 
@@ -470,21 +473,33 @@ export const CinematicScroller: React.FC = () => {
     );
   };
 
-  // Share Invitation
+  // Share Invitation (Native Share Sheet with Reliable Clipboard Fallback)
   const handleShareReal = async () => {
+    const shareData = {
+      title: 'Engagement Ceremony: Suvarna & Rajesh',
+      text: 'You are warmly invited to celebrate the engagement of Suvarna and Rajesh on 26th November at 08 AM in Vemulawada.',
+      url: window.location.href,
+    };
+
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: 'Engagement Ceremony: Suvarna & Rajesh',
-          text: 'You are warmly invited to celebrate the engagement of Suvarna and Rajesh on 26th November at 08 AM in Vemulawada.',
-          url: window.location.href,
-        });
-      } catch {
-        // User dismiss
+        await navigator.share(shareData);
+        return;
+      } catch (err: unknown) {
+        const error = err as Error;
+        if (error?.name === 'AbortError') {
+          return;
+        }
+        console.warn('Native share failed or gesture expired:', err);
       }
-    } else {
+    }
+
+    // Fallback: Copy invitation URL to clipboard
+    try {
       await navigator.clipboard.writeText(window.location.href);
       alert('Invitation link copied to clipboard!');
+    } catch {
+      prompt('Copy invitation link:', window.location.href);
     }
   };
 

@@ -423,27 +423,24 @@ export const CinematicScroller: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Side Floating Capsule: Download Card (Unified Apple Liquid Glass) */}
+        {/* Right Side Floating Capsule: Download Card (Slanted / Cross Apple Liquid Glass Pill) */}
         <div
           ref={rightActionsRef}
-          className="absolute right-2.5 sm:right-6 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
+          className="absolute right-2 sm:right-5 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
         >
-          <div className="apple-liquid-glass w-[68px] sm:w-[76px] py-3.5 px-1 rounded-[32px] sm:rounded-[36px] flex flex-col items-center justify-center pointer-events-auto shadow-2xl">
-            {/* Download Card */}
-            <button
-              type="button"
-              onClick={handleSaveCard}
-              title="Save Invitation Card"
-              className="apple-liquid-glass-btn w-full py-1.5 flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] group"
-            >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-0.5 group-hover:bg-white/20 transition-colors">
-                <Download className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
-              </div>
-              <span className="text-[9px] font-sans font-semibold tracking-normal text-[#2e0854] leading-tight text-center">
-                Save Card
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleSaveCard}
+            title="Save Invitation Card"
+            className="apple-liquid-glass px-3.5 py-2 rounded-full flex items-center gap-2 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[20deg] hover:rotate-[16deg] transition-all origin-center"
+          >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white/20">
+              <Download className="w-4 h-4 text-[#2e0854]" />
+            </div>
+            <span className="text-[10px] font-sans font-semibold tracking-normal text-[#2e0854] whitespace-nowrap pr-0.5">
+              Save Card
+            </span>
+          </button>
         </div>
       </div>
     </div>

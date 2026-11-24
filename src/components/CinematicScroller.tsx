@@ -423,21 +423,23 @@ export const CinematicScroller: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Side Floating Capsule: Download Card (Slanted / Cross Apple Liquid Glass Pill) */}
+        {/* Right Side Floating Capsule: Download Card (Edge Cut-Off Cross Pill with Unrotated Icon) */}
         <div
           ref={rightActionsRef}
-          className="absolute right-2 sm:right-5 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
+          className="absolute right-0 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0 overflow-visible"
         >
           <button
             type="button"
             onClick={handleSaveCard}
             title="Save Invitation Card"
-            className="apple-liquid-glass px-3.5 py-2 rounded-full flex items-center gap-2 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[20deg] hover:rotate-[16deg] transition-all origin-center"
+            className="apple-liquid-glass pl-4 pr-3 py-2 rounded-l-full rounded-r-none border-r-0 flex items-center gap-2 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl -rotate-[16deg] origin-right transition-all group"
           >
-            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white/20">
-              <Download className="w-4 h-4 text-[#2e0854]" />
+            {/* Unrotated Icon: Counter-rotated to stay perfectly upright */}
+            <div className="rotate-[16deg] w-7 h-7 rounded-full flex items-center justify-center bg-white/25 group-hover:bg-white/40 transition-colors">
+              <Download className="w-4 h-4 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
             </div>
-            <span className="text-[10px] font-sans font-semibold tracking-normal text-[#2e0854] whitespace-nowrap pr-0.5">
+            {/* Unrotated Text: Counter-rotated to stay perfectly upright */}
+            <span className="rotate-[16deg] text-[10.5px] font-sans font-semibold tracking-normal text-[#2e0854] whitespace-nowrap pr-1 group-hover:text-[#7e22ce] transition-colors">
               Save Card
             </span>
           </button>

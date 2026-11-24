@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
-import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
+import { MapPin, Download, Share2, Heart, X, Music } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,6 +33,7 @@ export const CinematicScroller: React.FC = () => {
 
   // Background Music (SVSC Title BGM Loop) State
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   // Heartfelt Action Confirmation Modal State
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -43,38 +44,76 @@ export const CinematicScroller: React.FC = () => {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
 
-  // 1. Continuous Background Music (SVSC Title BGM) in Unmuted Loop
+  // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & iOS AudioContext Unlock
+  const unlockAndPlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Resume Web Audio AudioContext if available (unlocks iOS silent mode & audio pipeline)
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+      }
+    } catch {}
+
+    if (audio.paused) {
+      audio.volume = 0.85;
+      audio.play().then(() => {
+        setIsAudioPlaying(true);
+      }).catch((err) => {
+        console.warn('Awaiting user gesture for audio:', err);
+      });
+    }
+  };
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     audio.volume = 0.85;
 
-    const playAudio = () => {
-      if (audio && audio.paused) {
-        audio.play().catch(() => {
-          // Awaiting browser user activation gesture
-        });
-      }
-    };
+    // Attempt direct autoplay immediately on mount
+    unlockAndPlay();
 
-    // Attempt direct autoplay
-    playAudio();
+    // Listen to audio state events
+    const onPlay = () => setIsAudioPlaying(true);
+    const onPause = () => setIsAudioPlaying(false);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
 
-    // Unlock and play unmuted on very first user interaction anywhere
+    // Unlock on the very first gesture anywhere on the screen
     const activationEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'];
     activationEvents.forEach((ev) => {
-      window.addEventListener(ev, playAudio, { passive: true });
-      document.addEventListener(ev, playAudio, { passive: true });
+      window.addEventListener(ev, unlockAndPlay, { passive: true });
+      document.addEventListener(ev, unlockAndPlay, { passive: true });
     });
 
     return () => {
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
       activationEvents.forEach((ev) => {
-        window.removeEventListener(ev, playAudio);
-        document.removeEventListener(ev, playAudio);
+        window.removeEventListener(ev, unlockAndPlay);
+        document.removeEventListener(ev, unlockAndPlay);
       });
     };
   }, []);
+
+  const toggleAudio = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      unlockAndPlay();
+    } else {
+      audio.pause();
+      setIsAudioPlaying(false);
+    }
+  };
 
   // 2. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -544,7 +583,10 @@ export const CinematicScroller: React.FC = () => {
         Featuring Shimmering Names "SUVARNA ❤️ RAJESH" with Radiant Heart Love Icon
       */}
       {!isLoaded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b0314]">
+        <div 
+          onClick={unlockAndPlay}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b0314] cursor-pointer"
+        >
           <div className="w-full max-w-[440px] h-full min-h-[100dvh] bg-white flex flex-col items-center justify-center p-6 shadow-2xl relative overflow-hidden select-none">
             {/* Subtle Royal Aura Background */}
             <div className="absolute top-1/4 -left-12 w-64 h-64 bg-purple-200/50 rounded-full blur-3xl pointer-events-none" />
@@ -581,14 +623,51 @@ export const CinematicScroller: React.FC = () => {
         style={{ touchAction: 'pan-y' }}
         className="relative w-full max-w-[440px] h-[100dvh] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
       >
-        {/* Continuous Background Music Stream (SVSC Title BGM) */}
+        {/* Continuous Background Music Stream (Dual Native AAC & MP3 for 100% Mobile Compatibility) */}
         <audio
           ref={audioRef}
-          src="/audio/bgm.mp3"
           loop
           preload="auto"
           playsInline
-        />
+        >
+          <source src="/audio/bgm.m4a" type="audio/mp4" />
+          <source src="/audio/bgm.mp3" type="audio/mpeg" />
+        </audio>
+
+        {/* Floating Ambient Music Control (SVSC Title BGM) */}
+        <button
+          type="button"
+          onClick={toggleAudio}
+          title={isAudioPlaying ? 'Pause Background Music' : 'Play Background Music'}
+          className="absolute top-4 right-4 z-40 apple-liquid-glass px-2.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer text-[#2e0854] hover:text-[#7e22ce] transition-all shadow-lg active:scale-95 select-none pointer-events-auto"
+        >
+          {isAudioPlaying ? (
+            <>
+              <div className="flex items-center gap-0.5 h-3">
+                <span className="w-0.5 h-3 bg-[#7e22ce] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-0.5 h-2 bg-[#9333ea] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-0.5 h-3 bg-[#7e22ce] rounded-full animate-bounce [animation-delay:-0.45s]" />
+              </div>
+              <Music className="w-3.5 h-3.5 text-[#7e22ce]" />
+            </>
+          ) : (
+            <>
+              <Music className="w-3.5 h-3.5 text-[#7e22ce] animate-pulse" />
+              <span className="text-[10px] font-sans font-medium text-[#6b21a8] pr-0.5">
+                Tap for Music
+              </span>
+            </>
+          )}
+        </button>
+
+        {/* Full-Screen First-Tap Audio Unlock Hotspot (Disappears instantly once playing) */}
+        {!isAudioPlaying && (
+          <div
+            onClick={unlockAndPlay}
+            className="absolute inset-0 z-20 cursor-pointer pointer-events-auto"
+            title="Tap anywhere to enjoy with music"
+          />
+        )}
 
         {/* Full-Screen Video Canvas (Edge-to-Edge) */}
         <canvas

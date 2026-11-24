@@ -168,13 +168,13 @@ export const CinematicScroller: React.FC = () => {
     // C. Master Cinematic Timeline (Plays automatically on first scroll gesture)
     const playTimeline = gsap.timeline({ paused: true });
 
-    // 1. Video frames automatically play slowly and gracefully through the entire animated invitation (7.5s cinematic pace)
+    // 1. Video frames automatically play very slowly, smoothly, and deliberately (14.0s slow-motion cinematic pace)
     playTimeline.to(
       playhead,
       {
         frame: totalFrames - 1,
         ease: 'power1.inOut',
-        duration: 7.5,
+        duration: 14.0,
         onUpdate: () => {
           render(playhead.frame);
         },
@@ -190,9 +190,9 @@ export const CinematicScroller: React.FC = () => {
         {
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 1.5,
+          duration: 2.5,
         },
-        5.8
+        11.0
       );
     }
 
@@ -208,7 +208,7 @@ export const CinematicScroller: React.FC = () => {
         });
       },
       [],
-      6.6
+      12.5
     );
 
     // 4. Interactive Side Floating Buttons glide in
@@ -221,9 +221,9 @@ export const CinematicScroller: React.FC = () => {
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 0.8,
+          duration: 1.0,
         },
-        7.0
+        13.0
       );
     }
 
@@ -236,9 +236,9 @@ export const CinematicScroller: React.FC = () => {
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 0.8,
+          duration: 1.0,
         },
-        7.0
+        13.0
       );
     }
 

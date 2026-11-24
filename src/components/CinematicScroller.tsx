@@ -26,7 +26,6 @@ export const CinematicScroller: React.FC = () => {
   const leftActionsRef = useRef<HTMLDivElement | null>(null);
   const rightActionsRef = useRef<HTMLDivElement | null>(null);
 
-  const [loadProgress, setLoadProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [totalFrames, setTotalFrames] = useState(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
@@ -62,7 +61,6 @@ export const CinematicScroller: React.FC = () => {
         const checkProgress = () => {
           if (isCancelled) return;
           loadedCount++;
-          setLoadProgress(Math.round((loadedCount / totalItems) * 100));
           if (loadedCount >= totalItems) {
             imagesRef.current = images;
             setIsLoaded(true);
@@ -136,7 +134,7 @@ export const CinematicScroller: React.FC = () => {
     // B. Crystal Clear 100% Native Edge-to-Edge Buffer
     const resizeCanvas = () => {
       if (!containerRef.current || !canvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const w = containerRef.current.clientWidth || window.innerWidth;
       const h = containerRef.current.clientHeight || window.innerHeight;
 
@@ -408,11 +406,11 @@ export const CinematicScroller: React.FC = () => {
     return () => clearTimeout(timer);
   }, [pendingAction, countdown, isClosing]);
 
-  // Save Card to Photos
+  // Save Card to Photos (Ultra HD 1080x1920 Lossless Studio Quality)
   const handleSaveCardReal = () => {
     const link = document.createElement('a');
-    link.href = '/images/final_card.jpg';
-    link.download = 'Suvarna_Rajesh_Engagement_Invitation.jpg';
+    link.href = '/images/final_card.png';
+    link.download = 'Suvarna_Rajesh_Engagement_Invitation.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -492,16 +490,8 @@ export const CinematicScroller: React.FC = () => {
             <div className="absolute top-1/4 -left-12 w-64 h-64 bg-purple-200/50 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-1/4 -right-12 w-64 h-64 bg-pink-100/50 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Central Shimmer Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center space-y-4 text-center">
-              {/* Elegant Royal Pill */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-100/80 shadow-xs">
-                <Heart className="w-3 h-3 text-[#7e22ce] fill-[#7e22ce]" />
-                <span className="text-[10px] font-sans font-semibold text-[#6b21a8] uppercase tracking-widest">
-                  Engagement Celebration
-                </span>
-              </div>
-
+            {/* Central Shimmer Content: Pure Shimmering Couple Names */}
+            <div className="relative z-10 flex flex-col items-center justify-center text-center">
               {/* Shimmering Couple Names with Animated Love Heart Icon */}
               <div className="flex items-center justify-center gap-2 sm:gap-2.5 flex-nowrap">
                 <span className="name-shimmer font-heading text-2xl sm:text-3xl font-bold tracking-wider">
@@ -516,28 +506,6 @@ export const CinematicScroller: React.FC = () => {
                 <span className="name-shimmer font-heading text-2xl sm:text-3xl font-bold tracking-wider">
                   RAJESH
                 </span>
-              </div>
-
-              {/* Romantic Date & Venue Line */}
-              <div className="text-xs font-serif italic text-[#7e22ce]/90 font-medium tracking-wide">
-                26th November • Vemulawada
-              </div>
-
-              {/* Luxury Shimmer Progress Bar */}
-              <div className="w-56 max-w-[80vw] flex flex-col items-center space-y-2 pt-3">
-                <div className="w-full h-1.5 bg-purple-100/80 rounded-full overflow-hidden p-[1px] shadow-inner">
-                  <div
-                    className="h-full rounded-full transition-all duration-300 ease-out shimmer-progress-bar"
-                    style={{ width: `${Math.max(6, loadProgress)}%` }}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between w-full text-[11px] font-sans font-medium text-[#7e22ce]">
-                  <span className="tracking-wide">
-                    {totalFrames === 0 ? 'Preparing Invitation' : 'Loading Invitation'}
-                  </span>
-                  <span className="font-semibold">{loadProgress}%</span>
-                </div>
               </div>
             </div>
           </div>

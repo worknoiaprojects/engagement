@@ -809,7 +809,7 @@ export const CinematicScroller: React.FC = () => {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-[0_2px_8px_rgba(46,8,84,0.08)]">
                   <Heart className="w-3 h-3 text-[#7e22ce] fill-[#7e22ce]" />
                   <span className="text-[10px] font-sans font-semibold text-[#6b21a8] tracking-normal">
-                    With Our Blessings
+                    With Your Blessings
                   </span>
                 </div>
 

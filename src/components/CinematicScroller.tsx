@@ -423,20 +423,20 @@ export const CinematicScroller: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Side Floating Capsule: Download (Edge Cut-Off Cross Pill with Upward Bend & Icon Only) */}
+        {/* Right Side Floating Capsule: Download (Edge Cut-Off Cross Pill with Pronounced Upward Bend & Icon Only) */}
         <div
           ref={rightActionsRef}
-          className="absolute right-0 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0 overflow-visible"
+          className="absolute -right-3 sm:-right-4 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
         >
           <button
             type="button"
             onClick={handleSaveCard}
             title="Save Invitation Card"
-            className="apple-liquid-glass pl-3.5 pr-2.5 py-2.5 rounded-l-full rounded-r-none border-r-0 flex items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[16deg] origin-right transition-all group"
+            className="apple-liquid-glass w-[78px] sm:w-[86px] h-[58px] sm:h-[64px] rounded-l-[32px] rounded-r-none border-r-0 flex items-center justify-start pl-3.5 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[24deg] origin-right transition-all group"
           >
             {/* Unrotated Icon: Counter-rotated to stay perfectly upright */}
-            <div className="-rotate-[16deg] w-8 h-8 rounded-full flex items-center justify-center bg-white/25 group-hover:bg-white/40 transition-colors">
-              <Download className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
+            <div className="-rotate-[24deg] w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/30 group-hover:bg-white/45 shadow-sm transition-colors">
+              <Download className="w-5 h-5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
             </div>
           </button>
         </div>

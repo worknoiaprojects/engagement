@@ -390,25 +390,25 @@ export const CinematicScroller: React.FC = () => {
           <div className="apple-liquid-glass w-[68px] sm:w-[74px] py-4 pr-3 pl-3 rounded-r-[32px] rounded-l-none border-l-0 skew-y-[18deg] origin-left shadow-2xl transition-all pointer-events-auto">
             {/* Unskewed Vertical Layout: Icons are in a 100% straight vertical line */}
             <div className="-skew-y-[18deg] flex flex-col items-center justify-center gap-2.5">
-              {/* Directions Icon (Straight & Upright) */}
+              {/* Directions Icon (Darker Royal Purple with Lavender Hover) */}
               <button
                 type="button"
                 onClick={handleGetDirections}
                 title="Directions to Venue"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/30 hover:bg-white/45 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 hover:bg-white/55 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
               >
                 <MapPin className="w-5 h-5 text-[#2e0854] hover:text-[#7e22ce] transition-colors" />
               </button>
 
               {/* Delicate Glass Divider */}
-              <div className="w-6 h-[1px] bg-white/35" />
+              <div className="w-6 h-[1px] bg-purple-900/15" />
 
-              {/* Share Icon (Straight & Upright) */}
+              {/* Share Icon (Darker Royal Purple with Lavender Hover) */}
               <button
                 type="button"
                 onClick={handleShare}
                 title="Share Invitation"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/30 hover:bg-white/45 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 hover:bg-white/55 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
               >
                 <Share2 className="w-5 h-5 text-[#2e0854] hover:text-[#7e22ce] transition-colors" />
               </button>
@@ -428,7 +428,7 @@ export const CinematicScroller: React.FC = () => {
             className="apple-liquid-glass w-[78px] sm:w-[86px] h-[58px] sm:h-[64px] rounded-l-[32px] rounded-r-none border-r-0 flex items-center justify-start pl-3.5 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[24deg] origin-right transition-all group"
           >
             {/* Unrotated Icon: Counter-rotated to stay perfectly upright */}
-            <div className="-rotate-[24deg] w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/30 group-hover:bg-white/45 shadow-sm transition-colors">
+            <div className="-rotate-[24deg] w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 group-hover:bg-white/55 shadow-sm transition-colors">
               <Download className="w-5 h-5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
             </div>
           </button>

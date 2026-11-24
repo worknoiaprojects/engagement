@@ -28,14 +28,19 @@
    ---------------------------------------------------- */
 
 .apple-liquid-glass {
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(243, 232, 255, 0.2) 40%,
+    rgba(216, 180, 254, 0.28) 100%
+  );
   backdrop-filter: blur(0.5px) url(#lg-filter) blur(1px) saturate(1.5) brightness(1.1);
   -webkit-backdrop-filter: blur(8px) saturate(1.8) brightness(1.15) contrast(1.05);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.15),
-    inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.5),
-    inset 0 0 12px rgba(255, 255, 255, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.2);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 12px rgba(126, 34, 206, 0.16),
+    0 8px 32px rgba(43, 11, 63, 0.22);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

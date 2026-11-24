@@ -333,44 +333,44 @@ export const CinematicScroller: React.FC = () => {
           currentText += prefix[charIndex];
           setTypedText(currentText);
           charIndex++;
-          timeoutId = setTimeout(step, 24);
+          timeoutId = setTimeout(step, 42);
         } else {
           phase = 'typing_typo';
           charIndex = 0;
-          timeoutId = setTimeout(step, 45);
+          timeoutId = setTimeout(step, 50);
         }
       } else if (phase === 'typing_typo') {
         if (charIndex < typo.length) {
           currentText += typo[charIndex];
           setTypedText(currentText);
           charIndex++;
-          timeoutId = setTimeout(step, 40);
+          timeoutId = setTimeout(step, 48);
         } else {
           phase = 'pause_before_backspace';
-          timeoutId = setTimeout(step, 420); // Thoughtful pause before backspace
+          timeoutId = setTimeout(step, 550); // Thoughtful pause before backspace
         }
       } else if (phase === 'pause_before_backspace') {
         phase = 'backspacing';
-        timeoutId = setTimeout(step, 55);
+        timeoutId = setTimeout(step, 65);
       } else if (phase === 'backspacing') {
         if (currentText.length > prefix.length) {
           currentText = currentText.slice(0, -1);
           setTypedText(currentText);
-          timeoutId = setTimeout(step, 48); // Deleting 8 letters one by one
+          timeoutId = setTimeout(step, 65); // Deliberate, graceful 8-letter deletion
         } else {
           phase = 'pause_before_resume';
-          timeoutId = setTimeout(step, 240); // Brief pause before typing true sentiment
+          timeoutId = setTimeout(step, 350); // Pause before typing true sentiment
         }
       } else if (phase === 'pause_before_resume') {
         phase = 'typing_suffix';
         charIndex = 0;
-        timeoutId = setTimeout(step, 45);
+        timeoutId = setTimeout(step, 50);
       } else if (phase === 'typing_suffix') {
         if (charIndex < suffix.length) {
           currentText += suffix[charIndex];
           setTypedText(currentText);
           charIndex++;
-          timeoutId = setTimeout(step, 24);
+          timeoutId = setTimeout(step, 40);
         } else {
           phase = 'done';
           setIsTypingDone(true);
@@ -378,8 +378,8 @@ export const CinematicScroller: React.FC = () => {
       }
     };
 
-    // Begin typing softly after modal bloom completes
-    timeoutId = setTimeout(step, 650);
+    // Begin typing calmly after slow 1.25s modal expansion settles
+    timeoutId = setTimeout(step, 1050);
 
     return () => {
       isCancelled = true;
@@ -627,7 +627,7 @@ export const CinematicScroller: React.FC = () => {
                 '--start-x': `${startX}px`,
                 '--start-y': `${startY}px`,
               } as React.CSSProperties}
-              className={`w-full max-w-[340px] sm:max-w-[350px] p-5 sm:p-5.5 rounded-[30px] apple-liquid-glass-modal popup-modal-card relative shadow-2xl flex flex-col items-center text-center space-y-3 ${
+              className={`w-full max-w-[340px] sm:max-w-[350px] h-[370px] p-5 sm:p-6 rounded-[30px] apple-liquid-glass-modal popup-modal-card relative shadow-2xl flex flex-col justify-between items-center text-center ${
                 isClosing ? 'modal-exit-origin' : 'modal-enter-origin'
               }`}
             >
@@ -640,22 +640,25 @@ export const CinematicScroller: React.FC = () => {
                 <X className="w-3.5 h-3.5 text-[#581c87]" />
               </button>
 
-              {/* Heart Badge (Delicate, Reduced Font Size) */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-[0_2px_8px_rgba(46,8,84,0.08)]">
-                <Heart className="w-3 h-3 text-[#7e22ce] fill-[#7e22ce]" />
-                <span className="text-[10px] font-sans font-semibold text-[#6b21a8] tracking-normal">
-                  With Our Blessings
-                </span>
+              {/* Top Section: Badge & Headline */}
+              <div className="w-full flex flex-col items-center space-y-2">
+                {/* Heart Badge (Delicate, Reduced Font Size) */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-[0_2px_8px_rgba(46,8,84,0.08)]">
+                  <Heart className="w-3 h-3 text-[#7e22ce] fill-[#7e22ce]" />
+                  <span className="text-[10px] font-sans font-semibold text-[#6b21a8] tracking-normal">
+                    With Our Blessings
+                  </span>
+                </div>
+
+                {/* Headline (Refined, Reduced Font Size) */}
+                <h3 className="font-heading text-base sm:text-[17px] text-[#2e0854] font-semibold tracking-normal leading-snug drop-shadow-xs px-2">
+                  Thank you for your warm love &amp; blessings
+                </h3>
               </div>
 
-              {/* Headline (Refined, Reduced Font Size) */}
-              <h3 className="font-heading text-base sm:text-[17px] text-[#2e0854] font-semibold tracking-normal leading-snug drop-shadow-xs px-2">
-                Thank you for your warm love &amp; blessings
-              </h3>
-
-              {/* Emotional Couple Message with Human Typing & Backspace Animation (Delicate, Reduced Font Size) */}
-              <div className="w-full min-h-[76px] flex items-center justify-center px-1">
-                <p className="text-xs sm:text-[12.5px] font-sans text-[#4c1d95] font-medium leading-relaxed drop-shadow-xs">
+              {/* Middle Section: Fixed-Height Emotional Message Container (Zero Card Resizing during Typing/Backspace) */}
+              <div className="w-full h-[105px] flex items-center justify-center px-1">
+                <p className="text-xs sm:text-[12.5px] font-sans text-[#4c1d95] font-medium leading-relaxed drop-shadow-xs text-center">
                   &ldquo;{typedText}&rdquo;
                   {!isTypingDone && (
                     <span className="inline-block w-0.5 h-3 ml-0.5 align-middle bg-[#7e22ce] animate-pulse" />
@@ -663,20 +666,20 @@ export const CinematicScroller: React.FC = () => {
                 </p>
               </div>
 
-              {/* Couple Signature (Delicate, Reduced Font Size) */}
-              <div className="text-xs sm:text-[13px] font-serif italic text-[#7e22ce] font-semibold">
-                — Suvarna &amp; Rajesh
-              </div>
+              {/* Bottom Section: Signature & Clean Action Button (No Blinking Dot) */}
+              <div className="w-full flex flex-col items-center space-y-2">
+                {/* Couple Signature (Delicate, Reduced Font Size) */}
+                <div className="text-xs sm:text-[13px] font-serif italic text-[#7e22ce] font-semibold">
+                  — Suvarna &amp; Rajesh
+                </div>
 
-              {/* Timer & Execution Status Button (Delicate, Reduced Font Size, No Border) */}
-              <div className="w-full pt-0.5 flex flex-col items-center">
+                {/* Timer & Execution Status Button (No Blinking Dot, Box Shadow Only) */}
                 <button
                   type="button"
                   onClick={() => handleCloseModal(true)}
                   title="Click to proceed immediately"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-[0_3px_14px_rgba(46,8,84,0.1)] hover:shadow-[0_5px_18px_rgba(46,8,84,0.16)] active:scale-98 text-[11px] font-sans font-medium text-[#581c87] transition-all cursor-pointer"
+                  className="px-5 py-2 rounded-full bg-white shadow-[0_3px_14px_rgba(46,8,84,0.1)] hover:shadow-[0_5px_18px_rgba(46,8,84,0.16)] active:scale-98 text-[11px] font-sans font-medium text-[#581c87] transition-all cursor-pointer"
                 >
-                  <span className="w-2 h-2 rounded-full bg-[#7e22ce] animate-ping" />
                   <span>
                     {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-xs ml-1">{countdown}s</strong>
                   </span>

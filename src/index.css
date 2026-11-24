@@ -79,10 +79,10 @@
    ---------------------------------------------------- */
 
 .popup-modal-backdrop {
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              backdrop-filter 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              -webkit-backdrop-filter 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+              -webkit-backdrop-filter 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 1.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .popup-modal-backdrop.entering {
@@ -106,21 +106,21 @@
 }
 
 .popup-modal-card.modal-enter-origin {
-  animation: liquidModalExpandFromButton 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: liquidModalExpandFromButton 1.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .popup-modal-card.modal-exit-origin {
-  animation: liquidModalCollapseToButton 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: liquidModalCollapseToButton 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes liquidModalExpandFromButton {
   0% {
     opacity: 0;
-    transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.1);
-    filter: blur(10px);
+    transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.08);
+    filter: blur(12px);
   }
-  30% {
-    opacity: 0.7;
+  35% {
+    opacity: 0.8;
   }
   100% {
     opacity: 1;

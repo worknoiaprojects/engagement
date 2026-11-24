@@ -488,7 +488,7 @@ export const CinematicScroller: React.FC = () => {
     }
   };
 
-  // Trigger Instant Action & Display Heartfelt Thank-You Modal
+  // Trigger Liquid Glass Popup before action execution (Redirect happens AFTER popup ends)
   const triggerActionWithModal = (
     type: 'directions' | 'share' | 'download',
     event?: React.MouseEvent
@@ -503,23 +503,20 @@ export const CinematicScroller: React.FC = () => {
     }
 
     let title = 'Venue Directions';
-    let actionText = 'Opening Google Maps';
+    let actionText = 'Opening Google Maps in';
     let execute = handleGetDirectionsReal;
 
     if (type === 'download') {
       title = 'Invitation Card';
-      actionText = 'Card Downloaded';
+      actionText = 'Downloading your card in';
       execute = handleSaveCardReal;
     } else if (type === 'share') {
       title = 'Share Invitation';
-      actionText = 'Opening Share Sheet';
+      actionText = 'Opening share sheet in';
       execute = handleShareReal;
     }
 
-    // Execute immediately so Share Sheet and Download appear instantly without waiting for any timer!
-    execute();
-
-    setCountdown(10);
+    setCountdown(13);
     setIsClosing(false);
     isClosingRef.current = false;
     setPendingAction({ type, title, actionText, execute });
@@ -722,15 +719,15 @@ export const CinematicScroller: React.FC = () => {
                   — Suvarna &amp; Rajesh
                 </div>
 
-                {/* Modal Dismiss Button */}
+                {/* Timer & Execution Button (Action Executes After Popup Ends) */}
                 <button
                   type="button"
-                  onClick={() => handleCloseModal(false)}
-                  title="Close note"
+                  onClick={() => handleCloseModal(true)}
+                  title="Click to proceed immediately"
                   className="px-5 py-2 rounded-full bg-white shadow-[0_3px_14px_rgba(46,8,84,0.1)] hover:shadow-[0_5px_18px_rgba(46,8,84,0.16)] active:scale-98 text-[11px] font-sans font-medium text-[#581c87] transition-all cursor-pointer"
                 >
                   <span>
-                    Close Note <strong className="text-[#2e0854] font-bold text-xs ml-1">({countdown}s)</strong>
+                    {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-xs ml-1">{countdown}s</strong>
                   </span>
                 </button>
               </div>

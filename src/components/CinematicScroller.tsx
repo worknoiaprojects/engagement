@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
-import { MapPin, Download, Share2, Heart, X, Volume2, VolumeX } from 'lucide-react';
+import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +33,6 @@ export const CinematicScroller: React.FC = () => {
 
   // Background Music (SVSC Title BGM Loop) State
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   // Heartfelt Action Confirmation Modal State
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -44,53 +43,38 @@ export const CinematicScroller: React.FC = () => {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
 
-  // 1. Continuous Background Music (SVSC Title BGM) in Loop
+  // 1. Continuous Background Music (SVSC Title BGM) in Unmuted Loop
   useEffect(() => {
     const audio = new Audio('/audio/bgm.mp3');
     audio.loop = true;
-    audio.volume = 0.65;
+    audio.volume = 0.85; // Beautiful, warm, unmuted volume
     audioRef.current = audio;
 
-    const startAudio = () => {
+    const playAudio = () => {
       if (audio.paused) {
-        audio.play().then(() => {
-          setIsPlaying(true);
-        }).catch(() => {
-          // Awaiting user gesture
-        });
+        audio.play().catch(() => {});
       }
     };
 
-    startAudio();
+    // Attempt direct autoplay
+    playAudio();
 
-    // Comply with mobile browser policy: initiate audio on the very first gesture
-    const gestureEvents = ['scroll', 'touchstart', 'touchend', 'click', 'pointerdown', 'wheel'];
-    const handleFirstGesture = () => {
-      startAudio();
-      gestureEvents.forEach((ev) => window.removeEventListener(ev, handleFirstGesture));
-    };
-
+    // Comply with mobile browser policy: initiate unmuted audio on very first interaction anywhere
+    const gestureEvents = ['touchstart', 'touchend', 'touchmove', 'scroll', 'pointerdown', 'click', 'wheel'];
     gestureEvents.forEach((ev) => {
-      window.addEventListener(ev, handleFirstGesture, { passive: true, once: true });
+      window.addEventListener(ev, playAudio, { passive: true });
+      document.addEventListener(ev, playAudio, { passive: true });
     });
 
     return () => {
-      gestureEvents.forEach((ev) => window.removeEventListener(ev, handleFirstGesture));
+      gestureEvents.forEach((ev) => {
+        window.removeEventListener(ev, playAudio);
+        document.removeEventListener(ev, playAudio);
+      });
       audio.pause();
       audio.src = '';
     };
   }, []);
-
-  const toggleAudio = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!audioRef.current) return;
-    if (audioRef.current.paused) {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(console.warn);
-    } else {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
 
   // 2. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -211,10 +195,14 @@ export const CinematicScroller: React.FC = () => {
       const cw = canvas.width;
       const ch = canvas.height;
 
-      // Dynamic Fully Responsive Fitting (Guarantees ZERO cropping on any mobile screen)
+      // Fill background buffer so no white gap or line can ever appear
+      ctx.fillStyle = '#0b0314';
+      ctx.fillRect(0, 0, cw, ch);
+
+      // Full edge-to-edge cover positioning (Zero white lines, zero borders)
       const hRatio = cw / imgA.width;
       const vRatio = ch / imgA.height;
-      const ratio = Math.min(hRatio, vRatio);
+      const ratio = Math.max(hRatio, vRatio);
       const drawW = imgA.width * ratio;
       const drawH = imgA.height * ratio;
       const shiftX = (cw - drawW) * 0.5;
@@ -495,7 +483,7 @@ export const CinematicScroller: React.FC = () => {
     }
   };
 
-  // Trigger Liquid Glass Popup before action execution
+  // Trigger Instant Action & Display Heartfelt Thank-You Modal
   const triggerActionWithModal = (
     type: 'directions' | 'share' | 'download',
     event?: React.MouseEvent
@@ -510,40 +498,37 @@ export const CinematicScroller: React.FC = () => {
     }
 
     let title = 'Venue Directions';
-    let actionText = 'Opening Google Maps in';
+    let actionText = 'Opening Google Maps';
     let execute = handleGetDirectionsReal;
 
     if (type === 'download') {
       title = 'Invitation Card';
-      actionText = 'Downloading your card in';
+      actionText = 'Card Downloaded';
       execute = handleSaveCardReal;
     } else if (type === 'share') {
       title = 'Share Invitation';
-      actionText = 'Opening share sheet in';
+      actionText = 'Opening Share Sheet';
       execute = handleShareReal;
     }
 
-    setCountdown(13);
+    // Execute immediately so Share Sheet and Download appear instantly without waiting for any timer!
+    execute();
+
+    setCountdown(10);
     setIsClosing(false);
     isClosingRef.current = false;
     setPendingAction({ type, title, actionText, execute });
   };
 
   return (
-    <div className="relative bg-white text-[#2b0b3f] min-h-screen w-full">
+    <div className="relative bg-[#0b0314] text-[#2b0b3f] min-h-screen w-full flex justify-center">
       {/* 
         Luxury Shimmer Loading Overlay
         Featuring Shimmering Names "SUVARNA ❤️ RAJESH" with Radiant Heart Love Icon
       */}
       {!isLoaded && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b0314]">
-          <div
-            style={{
-              maxWidth: 'min(440px, 100vw, calc(100dvh * 9 / 16))',
-              height: 'min(100dvh, calc(100vw * 16 / 9))',
-            }}
-            className="w-full bg-white flex flex-col items-center justify-center p-6 shadow-2xl relative overflow-hidden select-none"
-          >
+          <div className="w-full max-w-[440px] h-full min-h-[100dvh] bg-white flex flex-col items-center justify-center p-6 shadow-2xl relative overflow-hidden select-none">
             {/* Subtle Royal Aura Background */}
             <div className="absolute top-1/4 -left-12 w-64 h-64 bg-purple-200/50 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-1/4 -right-12 w-64 h-64 bg-pink-100/50 rounded-full blur-3xl pointer-events-none" />
@@ -571,49 +556,28 @@ export const CinematicScroller: React.FC = () => {
       )}
 
       {/* 
-        Full-Screen Viewport (Fully Dynamic & Responsive Aspect Ratio)
-        ZERO cut-offs on mobile, ZERO stretched elements, purely edge-to-edge
+        Full-Screen Viewport (Mobile-Locked Format, Max 440px on Desktop)
+        ZERO white lines, 100% full-bleed edge-to-edge on mobile
       */}
       <div
         ref={containerRef}
-        className="relative w-full h-full overflow-hidden bg-white select-none"
+        className="relative w-full max-w-[440px] h-[100dvh] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
       >
-        {/* Floating Ambient Music Control (SVSC Title BGM Loop) */}
-        <button
-          type="button"
-          onClick={toggleAudio}
-          title={isPlaying ? 'Mute Background Music' : 'Play Background Music'}
-          className="absolute top-4 right-4 z-40 apple-liquid-glass px-2.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer text-[#2e0854] hover:text-[#7e22ce] transition-all shadow-lg active:scale-95 select-none pointer-events-auto"
-        >
-          {isPlaying ? (
-            <>
-              <div className="flex items-center gap-0.5 h-3">
-                <span className="w-0.5 h-3 bg-[#7e22ce] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-0.5 h-2 bg-[#9333ea] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-0.5 h-3 bg-[#7e22ce] rounded-full animate-bounce [animation-delay:-0.45s]" />
-              </div>
-              <Volume2 className="w-4 h-4 text-[#7e22ce]" />
-            </>
-          ) : (
-            <VolumeX className="w-4 h-4 text-[#581c87]/70" />
-          )}
-        </button>
-
         {/* Full-Screen Video Canvas (Edge-to-Edge) */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-contain block"
+          className="absolute inset-0 w-full h-full object-cover block"
         />
 
         {/* 
-          High-Resolution Final Merged Card Image (100% Fully Responsive)
+          High-Resolution Final Merged Card Image (Edge-to-Edge)
           Crossfades smoothly over the canvas when the video animation completes
         */}
         <img
           ref={finalCardRef}
           src="/images/final_card_1080.webp"
           alt="Engagement Invitation - Suvarna & Rajesh"
-          className="absolute inset-0 w-full h-full object-contain block pointer-events-none opacity-0 z-10 will-change-opacity select-none"
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 will-change-opacity select-none"
         />
 
         {/* QR Code Touch Hotspot (Opens Directions to Vemulawada) */}
@@ -743,15 +707,15 @@ export const CinematicScroller: React.FC = () => {
                   — Suvarna &amp; Rajesh
                 </div>
 
-                {/* Timer & Execution Status Button (No Blinking Dot, Box Shadow Only) */}
+                {/* Modal Dismiss Button */}
                 <button
                   type="button"
-                  onClick={() => handleCloseModal(true)}
-                  title="Click to proceed immediately"
+                  onClick={() => handleCloseModal(false)}
+                  title="Close note"
                   className="px-5 py-2 rounded-full bg-white shadow-[0_3px_14px_rgba(46,8,84,0.1)] hover:shadow-[0_5px_18px_rgba(46,8,84,0.16)] active:scale-98 text-[11px] font-sans font-medium text-[#581c87] transition-all cursor-pointer"
                 >
                   <span>
-                    {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-xs ml-1">{countdown}s</strong>
+                    Close Note <strong className="text-[#2e0854] font-bold text-xs ml-1">({countdown}s)</strong>
                   </span>
                 </button>
               </div>

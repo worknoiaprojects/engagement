@@ -484,48 +484,48 @@ export const CinematicScroller: React.FC = () => {
         </div>
       </div>
 
-      {/* Heartfelt Liquid Glass Popup Modal */}
+      {/* Heartfelt Clear Liquid Glass Popup Modal (Unblurred Background, White Text) */}
       {pendingAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 animate-in fade-in duration-200">
           <div className="w-full max-w-[370px] p-6 rounded-[36px] apple-liquid-glass-modal relative shadow-2xl flex flex-col items-center text-center space-y-4">
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setPendingAction(null)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white/40 hover:bg-white/60 text-[#2e0854] transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/35 text-white transition-colors cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-white" />
             </button>
 
             {/* Heart Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100/70 border border-purple-200/80 shadow-xs">
-              <Heart className="w-3.5 h-3.5 text-[#7e22ce] fill-[#7e22ce]" />
-              <span className="text-[11px] font-sans font-medium text-[#4c1d95] tracking-normal">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/30 shadow-xs">
+              <Heart className="w-3.5 h-3.5 text-white fill-white" />
+              <span className="text-[11px] font-sans font-medium text-white tracking-normal drop-shadow-sm">
                 With Our Blessings
               </span>
             </div>
 
             {/* Headline */}
-            <h3 className="font-heading text-xl text-[#2e0854] font-semibold tracking-normal leading-snug">
+            <h3 className="font-heading text-xl text-white font-semibold tracking-normal leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
               Thank you for your warm love &amp; blessings
             </h3>
 
             {/* Emotional Couple Message */}
-            <p className="text-xs font-sans text-[#3b0764]/90 leading-relaxed px-1">
+            <p className="text-xs font-sans text-white/95 leading-relaxed px-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
               "Your action shows us so much love and support. Your presence means everything to us, and we are wishing and praying to see you celebrate with us at Vemulawada!"
             </p>
 
             {/* Couple Signature */}
-            <div className="text-sm font-serif italic text-[#7e22ce] font-medium">
+            <div className="text-sm font-serif italic text-white font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
               — Suvarna &amp; Rajesh
             </div>
 
             {/* Timer & Execution Status */}
             <div className="w-full pt-2 flex flex-col items-center gap-2.5">
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/40 border border-white/60 text-[11px] font-sans font-medium text-[#2e0854] shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-[#7e22ce] animate-ping" />
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 border border-white/30 text-[11px] font-sans font-medium text-white shadow-xs drop-shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-white animate-ping" />
                 <span>
-                  {pendingAction.actionText} <strong className="text-[#7e22ce] font-semibold">{countdown}s</strong>
+                  {pendingAction.actionText} <strong className="text-white font-bold">{countdown}s</strong>
                 </span>
               </div>
 
@@ -538,14 +538,14 @@ export const CinematicScroller: React.FC = () => {
                     setPendingAction(null);
                     run();
                   }}
-                  className="flex-1 py-2 px-3 rounded-full bg-gradient-to-r from-[#581c87] to-[#7e22ce] text-white text-xs font-sans font-semibold tracking-normal shadow-md hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+                  className="flex-1 py-2.5 px-3 rounded-full bg-gradient-to-r from-[#7e22ce] to-[#9333ea] text-white text-xs font-sans font-semibold tracking-normal shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer"
                 >
                   Proceed now
                 </button>
                 <button
                   type="button"
                   onClick={() => setPendingAction(null)}
-                  className="py-2 px-4 rounded-full bg-white/50 text-[#3b0764] text-xs font-sans font-medium hover:bg-white/70 transition-all cursor-pointer"
+                  className="py-2.5 px-4 rounded-full bg-white/25 border border-white/30 text-white text-xs font-sans font-medium hover:bg-white/40 transition-all cursor-pointer drop-shadow-sm"
                 >
                   Stay
                 </button>

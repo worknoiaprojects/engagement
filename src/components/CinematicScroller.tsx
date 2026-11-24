@@ -45,34 +45,34 @@ export const CinematicScroller: React.FC = () => {
 
   // 1. Continuous Background Music (SVSC Title BGM) in Unmuted Loop
   useEffect(() => {
-    const audio = new Audio('/audio/bgm.mp3');
-    audio.loop = true;
-    audio.volume = 0.85; // Beautiful, warm, unmuted volume
-    audioRef.current = audio;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.85;
 
     const playAudio = () => {
-      if (audio.paused) {
-        audio.play().catch(() => {});
+      if (audio && audio.paused) {
+        audio.play().catch(() => {
+          // Awaiting browser user activation gesture
+        });
       }
     };
 
     // Attempt direct autoplay
     playAudio();
 
-    // Comply with mobile browser policy: initiate unmuted audio on very first interaction anywhere
-    const gestureEvents = ['touchstart', 'touchend', 'touchmove', 'scroll', 'pointerdown', 'click', 'wheel'];
-    gestureEvents.forEach((ev) => {
+    // Unlock and play unmuted on very first user interaction anywhere
+    const activationEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'];
+    activationEvents.forEach((ev) => {
       window.addEventListener(ev, playAudio, { passive: true });
       document.addEventListener(ev, playAudio, { passive: true });
     });
 
     return () => {
-      gestureEvents.forEach((ev) => {
+      activationEvents.forEach((ev) => {
         window.removeEventListener(ev, playAudio);
         document.removeEventListener(ev, playAudio);
       });
-      audio.pause();
-      audio.src = '';
     };
   }, []);
 
@@ -569,6 +569,15 @@ export const CinematicScroller: React.FC = () => {
         style={{ touchAction: 'pan-y' }}
         className="relative w-full max-w-[440px] h-[100dvh] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
       >
+        {/* Continuous Background Music Stream (SVSC Title BGM) */}
+        <audio
+          ref={audioRef}
+          src="/audio/bgm.mp3"
+          loop
+          preload="auto"
+          playsInline
+        />
+
         {/* Full-Screen Video Canvas (Edge-to-Edge) */}
         <canvas
           ref={canvasRef}

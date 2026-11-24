@@ -486,8 +486,14 @@ export const CinematicScroller: React.FC = () => {
 
       {/* Heartfelt Clear Liquid Glass Popup Modal (Unblurred Background, White Text) */}
       {pendingAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 animate-in fade-in duration-200">
-          <div className="w-full max-w-[370px] p-6 rounded-[36px] apple-liquid-glass-modal relative shadow-2xl flex flex-col items-center text-center space-y-4">
+        <div 
+          onClick={() => setPendingAction(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-[370px] p-6 rounded-[36px] apple-liquid-glass-modal relative shadow-2xl flex flex-col items-center text-center space-y-4"
+          >
             {/* Close Button */}
             <button
               type="button"

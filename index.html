@@ -12,12 +12,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&family=Pinyon+Script&family=Gidugu&family=Mandali&family=NATS&family=Noto+Serif+Telugu:wght@400;500;600;700&family=Ramabhadra&family=Suranna&family=Tenali+Ramakrishna&display=swap" rel="stylesheet">
   </head>
   <body class="bg-white text-[#2b0b3f] selection:bg-[#7e22ce]/20 selection:text-[#3b0764] overflow-x-hidden">
-    <!-- Liquid Glass Distortion Filter Definition -->
+    <!-- Liquid Glass Distortion Filter Definitions -->
     <svg style="position: absolute; width: 0; height: 0; pointer-events: none;" aria-hidden="true">
       <defs>
+        <!-- Standard Button Liquid Glass Filter -->
         <filter id="lg-filter" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
           <feTurbulence type="fractalNoise" baseFrequency="0.035 0.035" numOctaves="2" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <!-- High-Refraction Living Liquid Flow Filter for Modal -->
+        <filter id="lg-popup-filter" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="3" result="noise">
+            <animate attributeName="baseFrequency" dur="10s" values="0.02 0.02;0.015 0.025;0.025 0.018;0.02 0.02" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs>
     </svg>

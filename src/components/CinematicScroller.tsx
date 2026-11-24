@@ -521,34 +521,12 @@ export const CinematicScroller: React.FC = () => {
             </div>
 
             {/* Timer & Execution Status */}
-            <div className="w-full pt-2 flex flex-col items-center gap-2.5">
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 border border-white/30 text-[11px] font-sans font-medium text-white shadow-xs drop-shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+            <div className="w-full pt-1 flex flex-col items-center">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 border border-white/35 text-xs font-sans font-medium text-white shadow-sm drop-shadow-sm">
+                <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
                 <span>
                   {pendingAction.actionText} <strong className="text-white font-bold">{countdown}s</strong>
                 </span>
-              </div>
-
-              {/* Immediate Proceed / Stay Buttons */}
-              <div className="flex items-center gap-2 w-full pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const run = pendingAction.execute;
-                    setPendingAction(null);
-                    run();
-                  }}
-                  className="flex-1 py-2.5 px-3 rounded-full bg-gradient-to-r from-[#7e22ce] to-[#9333ea] text-white text-xs font-sans font-semibold tracking-normal shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer"
-                >
-                  Proceed now
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPendingAction(null)}
-                  className="py-2.5 px-4 rounded-full bg-white/25 border border-white/30 text-white text-xs font-sans font-medium hover:bg-white/40 transition-all cursor-pointer drop-shadow-sm"
-                >
-                  Stay
-                </button>
               </div>
             </div>
           </div>

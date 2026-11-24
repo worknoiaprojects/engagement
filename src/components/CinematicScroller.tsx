@@ -35,7 +35,11 @@ export const CinematicScroller: React.FC = () => {
 
   // Heartfelt Action Confirmation Modal State
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(10);
+  const [isClosing, setIsClosing] = useState(false);
+  const isClosingRef = useRef(false);
+  const [typedText, setTypedText] = useState('');
+  const [isTypingDone, setIsTypingDone] = useState(false);
 
   // 1. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -293,14 +297,119 @@ export const CinematicScroller: React.FC = () => {
     };
   }, [isLoaded, totalFrames]);
 
-  // Heartfelt Action Countdown Timer
+  // Realistic Typing Animation with Emotional Typo & 8-Letter Backspace
   useEffect(() => {
-    if (!pendingAction) return;
+    if (!pendingAction) {
+      setTypedText('');
+      setIsTypingDone(false);
+      return;
+    }
+
+    let isCancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const prefix = 'Your action shows us so much love and support. Your presence means ';
+    const typo = 'so much '; // Exactly 8 characters
+    const suffix = 'everything to us, and we are wishing and praying to see you celebrate with us at Vemulawada!';
+
+    let phase:
+      | 'typing_prefix'
+      | 'typing_typo'
+      | 'pause_before_backspace'
+      | 'backspacing'
+      | 'pause_before_resume'
+      | 'typing_suffix'
+      | 'done' = 'typing_prefix';
+
+    let charIndex = 0;
+    let currentText = '';
+
+    const step = () => {
+      if (isCancelled) return;
+
+      if (phase === 'typing_prefix') {
+        if (charIndex < prefix.length) {
+          currentText += prefix[charIndex];
+          setTypedText(currentText);
+          charIndex++;
+          timeoutId = setTimeout(step, 24);
+        } else {
+          phase = 'typing_typo';
+          charIndex = 0;
+          timeoutId = setTimeout(step, 45);
+        }
+      } else if (phase === 'typing_typo') {
+        if (charIndex < typo.length) {
+          currentText += typo[charIndex];
+          setTypedText(currentText);
+          charIndex++;
+          timeoutId = setTimeout(step, 40);
+        } else {
+          phase = 'pause_before_backspace';
+          timeoutId = setTimeout(step, 420); // Thoughtful pause before backspace
+        }
+      } else if (phase === 'pause_before_backspace') {
+        phase = 'backspacing';
+        timeoutId = setTimeout(step, 55);
+      } else if (phase === 'backspacing') {
+        if (currentText.length > prefix.length) {
+          currentText = currentText.slice(0, -1);
+          setTypedText(currentText);
+          timeoutId = setTimeout(step, 48); // Deleting 8 letters one by one
+        } else {
+          phase = 'pause_before_resume';
+          timeoutId = setTimeout(step, 240); // Brief pause before typing true sentiment
+        }
+      } else if (phase === 'pause_before_resume') {
+        phase = 'typing_suffix';
+        charIndex = 0;
+        timeoutId = setTimeout(step, 45);
+      } else if (phase === 'typing_suffix') {
+        if (charIndex < suffix.length) {
+          currentText += suffix[charIndex];
+          setTypedText(currentText);
+          charIndex++;
+          timeoutId = setTimeout(step, 24);
+        } else {
+          phase = 'done';
+          setIsTypingDone(true);
+        }
+      }
+    };
+
+    // Begin typing softly after modal bloom completes
+    timeoutId = setTimeout(step, 320);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [pendingAction]);
+
+  // Smooth Dismissal or Action Execution with Exit Animation
+  const handleCloseModal = (shouldExecuteAction: boolean) => {
+    if (isClosingRef.current || !pendingAction) return;
+    isClosingRef.current = true;
+    setIsClosing(true);
+
+    const actionToRun = shouldExecuteAction ? pendingAction.execute : null;
+
+    setTimeout(() => {
+      setPendingAction(null);
+      setIsClosing(false);
+      isClosingRef.current = false;
+      if (actionToRun) {
+        actionToRun();
+      }
+    }, 380);
+  };
+
+  // Heartfelt Action Countdown Timer (10 Seconds)
+  useEffect(() => {
+    if (!pendingAction || isClosing) return;
 
     if (countdown <= 0) {
-      const run = pendingAction.execute;
-      setPendingAction(null);
-      run();
+      handleCloseModal(true);
       return;
     }
 
@@ -309,7 +418,7 @@ export const CinematicScroller: React.FC = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [pendingAction, countdown]);
+  }, [pendingAction, countdown, isClosing]);
 
   // Save Card to Photos
   const handleSaveCardReal = () => {
@@ -364,7 +473,9 @@ export const CinematicScroller: React.FC = () => {
       execute = handleShareReal;
     }
 
-    setCountdown(3);
+    setCountdown(10);
+    setIsClosing(false);
+    isClosingRef.current = false;
     setPendingAction({ type, title, actionText, execute });
   };
 
@@ -484,54 +595,63 @@ export const CinematicScroller: React.FC = () => {
         </div>
       </div>
 
-      {/* Heartfelt Clear Liquid Glass Popup Modal (Unblurred Background, White Text) */}
+      {/* Heartfelt Clear Liquid Glass Popup Modal (Lavender Typography & Typing Animation) */}
       {pendingAction && (
         <div 
-          onClick={() => setPendingAction(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-in fade-in duration-200"
+          onClick={() => handleCloseModal(false)}
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent popup-modal-backdrop ${
+            isClosing ? 'closing opacity-0' : 'entering opacity-100'
+          }`}
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-[370px] p-6 rounded-[36px] apple-liquid-glass-modal relative shadow-2xl flex flex-col items-center text-center space-y-4"
+            className={`w-full max-w-[380px] p-6 rounded-[36px] apple-liquid-glass-modal popup-modal-card relative shadow-2xl flex flex-col items-center text-center space-y-4 ${
+              isClosing ? 'modal-exit' : 'modal-enter'
+            }`}
           >
-            {/* Close Button */}
+            {/* Close Button (Soft Lavender) */}
             <button
               type="button"
-              onClick={() => setPendingAction(null)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/35 text-white transition-colors cursor-pointer"
+              onClick={() => handleCloseModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-purple-900/30 hover:bg-purple-800/50 text-[#e9d5ff] hover:text-white border border-purple-400/30 transition-colors cursor-pointer"
             >
-              <X className="w-4 h-4 text-white" />
+              <X className="w-4 h-4 text-[#e9d5ff]" />
             </button>
 
-            {/* Heart Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/30 shadow-xs">
-              <Heart className="w-3.5 h-3.5 text-white fill-white" />
-              <span className="text-[11px] font-sans font-medium text-white tracking-normal drop-shadow-sm">
+            {/* Heart Badge (Lavender) */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/40 border border-[#c084fc]/35 shadow-xs">
+              <Heart className="w-3.5 h-3.5 text-[#d8b4fe] fill-[#d8b4fe]" />
+              <span className="text-[11px] font-sans font-medium text-[#f3e8ff] tracking-normal drop-shadow-sm">
                 With Our Blessings
               </span>
             </div>
 
-            {/* Headline */}
-            <h3 className="font-heading text-xl text-white font-semibold tracking-normal leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            {/* Headline (Glowing Lavender-White) */}
+            <h3 className="font-heading text-xl text-[#f3e8ff] font-semibold tracking-normal leading-snug drop-shadow-[0_2px_8px_rgba(46,8,84,0.8)]">
               Thank you for your warm love &amp; blessings
             </h3>
 
-            {/* Emotional Couple Message */}
-            <p className="text-xs font-sans text-white/95 leading-relaxed px-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-              "Your action shows us so much love and support. Your presence means everything to us, and we are wishing and praying to see you celebrate with us at Vemulawada!"
-            </p>
+            {/* Emotional Couple Message with Human Typing & Backspace Animation (Lavender) */}
+            <div className="w-full min-h-[96px] flex items-center justify-center px-1">
+              <p className="text-[13px] sm:text-sm font-sans text-[#e9d5ff] font-medium leading-relaxed drop-shadow-[0_1px_4px_rgba(46,8,84,0.8)]">
+                &ldquo;{typedText}&rdquo;
+                {!isTypingDone && (
+                  <span className="inline-block w-0.5 h-3.5 ml-0.5 align-middle bg-[#d8b4fe] animate-pulse" />
+                )}
+              </p>
+            </div>
 
-            {/* Couple Signature */}
-            <div className="text-sm font-serif italic text-white font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+            {/* Couple Signature (Lavender Italics) */}
+            <div className="text-sm font-serif italic text-[#d8b4fe] font-semibold drop-shadow-[0_1px_4px_rgba(46,8,84,0.7)]">
               — Suvarna &amp; Rajesh
             </div>
 
-            {/* Timer & Execution Status */}
+            {/* Timer & Execution Status (10s Countdown in Lavender) */}
             <div className="w-full pt-1 flex flex-col items-center">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 border border-white/35 text-xs font-sans font-medium text-white shadow-sm drop-shadow-sm">
-                <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-950/45 border border-[#c084fc]/40 text-xs font-sans font-medium text-[#e9d5ff] shadow-sm drop-shadow-sm">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#d8b4fe] animate-ping" />
                 <span>
-                  {pendingAction.actionText} <strong className="text-white font-bold">{countdown}s</strong>
+                  {pendingAction.actionText} <strong className="text-[#f3e8ff] font-bold text-sm ml-1">{countdown}s</strong>
                 </span>
               </div>
             </div>

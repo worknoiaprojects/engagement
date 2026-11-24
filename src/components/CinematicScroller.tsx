@@ -3,9 +3,16 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
-import { MapPin, Download, Share2, ChevronDown } from 'lucide-react';
+import { MapPin, Download, Share2, ChevronDown, Heart, X } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
+
+interface PendingAction {
+  type: 'directions' | 'share' | 'download';
+  title: string;
+  actionText: string;
+  execute: () => void;
+}
 
 const getFramePath = (index: number) => {
   const paddedIndex = String(index).padStart(4, '0');
@@ -25,6 +32,10 @@ export const CinematicScroller: React.FC = () => {
   const [totalFrames, setTotalFrames] = useState(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const hasCelebratedRef = useRef(false);
+
+  // Heartfelt Action Confirmation Modal State
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [countdown, setCountdown] = useState(3);
 
   // 1. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -282,8 +293,26 @@ export const CinematicScroller: React.FC = () => {
     };
   }, [isLoaded, totalFrames]);
 
+  // Heartfelt Action Countdown Timer
+  useEffect(() => {
+    if (!pendingAction) return;
+
+    if (countdown <= 0) {
+      const run = pendingAction.execute;
+      setPendingAction(null);
+      run();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown((c) => c - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [pendingAction, countdown]);
+
   // Save Card to Photos
-  const handleSaveCard = () => {
+  const handleSaveCardReal = () => {
     const link = document.createElement('a');
     link.href = '/images/final_card.jpg';
     link.download = 'Suvarna_Rajesh_Engagement_Invitation.jpg';
@@ -293,7 +322,7 @@ export const CinematicScroller: React.FC = () => {
   };
 
   // Google Maps Directions
-  const handleGetDirections = () => {
+  const handleGetDirectionsReal = () => {
     window.open(
       'https://www.google.com/maps/search/?api=1&query=Vemulawada+Sri+Raja+Rajeshwara+Swamy+Temple',
       '_blank',
@@ -302,7 +331,7 @@ export const CinematicScroller: React.FC = () => {
   };
 
   // Share Invitation
-  const handleShare = async () => {
+  const handleShareReal = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
@@ -317,6 +346,26 @@ export const CinematicScroller: React.FC = () => {
       await navigator.clipboard.writeText(window.location.href);
       alert('Invitation link copied to clipboard!');
     }
+  };
+
+  // Trigger Liquid Glass Popup before action execution
+  const triggerActionWithModal = (type: 'directions' | 'share' | 'download') => {
+    let title = 'Venue Directions';
+    let actionText = 'Opening Google Maps in';
+    let execute = handleGetDirectionsReal;
+
+    if (type === 'download') {
+      title = 'Invitation Card';
+      actionText = 'Downloading your card in';
+      execute = handleSaveCardReal;
+    } else if (type === 'share') {
+      title = 'Share Invitation';
+      actionText = 'Opening share sheet in';
+      execute = handleShareReal;
+    }
+
+    setCountdown(3);
+    setPendingAction({ type, title, actionText, execute });
   };
 
   return (
@@ -364,7 +413,7 @@ export const CinematicScroller: React.FC = () => {
         {/* QR Code Touch Hotspot (Opens Directions to Vemulawada) */}
         <button
           type="button"
-          onClick={handleGetDirections}
+          onClick={() => triggerActionWithModal('directions')}
           title="Click to find venue directions on Google Maps"
           className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-48 h-32 z-20 cursor-pointer rounded-2xl focus:outline-none transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex items-center justify-center pointer-events-auto"
         />
@@ -393,7 +442,7 @@ export const CinematicScroller: React.FC = () => {
               {/* Directions Icon (Darker Royal Purple with Lavender Hover) */}
               <button
                 type="button"
-                onClick={handleGetDirections}
+                onClick={() => triggerActionWithModal('directions')}
                 title="Directions to Venue"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 hover:bg-white/55 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
               >
@@ -406,7 +455,7 @@ export const CinematicScroller: React.FC = () => {
               {/* Share Icon (Darker Royal Purple with Lavender Hover) */}
               <button
                 type="button"
-                onClick={handleShare}
+                onClick={() => triggerActionWithModal('share')}
                 title="Share Invitation"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 hover:bg-white/55 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
               >
@@ -423,7 +472,7 @@ export const CinematicScroller: React.FC = () => {
         >
           <button
             type="button"
-            onClick={handleSaveCard}
+            onClick={() => triggerActionWithModal('download')}
             title="Save Invitation Card"
             className="apple-liquid-glass w-[78px] sm:w-[86px] h-[58px] sm:h-[64px] rounded-l-[32px] rounded-r-none border-r-0 flex items-center justify-start pl-3.5 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[24deg] origin-right transition-all group"
           >
@@ -434,6 +483,77 @@ export const CinematicScroller: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Heartfelt Liquid Glass Popup Modal */}
+      {pendingAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-[370px] p-6 rounded-[36px] apple-liquid-glass-modal relative shadow-2xl flex flex-col items-center text-center space-y-4">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setPendingAction(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white/40 hover:bg-white/60 text-[#2e0854] transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Heart Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100/70 border border-purple-200/80 shadow-xs">
+              <Heart className="w-3.5 h-3.5 text-[#7e22ce] fill-[#7e22ce]" />
+              <span className="text-[11px] font-sans font-medium text-[#4c1d95] tracking-normal">
+                With Our Blessings
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h3 className="font-heading text-xl text-[#2e0854] font-semibold tracking-normal leading-snug">
+              Thank you for your warm love &amp; blessings
+            </h3>
+
+            {/* Emotional Couple Message */}
+            <p className="text-xs font-sans text-[#3b0764]/90 leading-relaxed px-1">
+              "Your action shows us so much love and support. Your presence means everything to us, and we are wishing and praying to see you celebrate with us at Vemulawada!"
+            </p>
+
+            {/* Couple Signature */}
+            <div className="text-sm font-serif italic text-[#7e22ce] font-medium">
+              — Suvarna &amp; Rajesh
+            </div>
+
+            {/* Timer & Execution Status */}
+            <div className="w-full pt-2 flex flex-col items-center gap-2.5">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/40 border border-white/60 text-[11px] font-sans font-medium text-[#2e0854] shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-[#7e22ce] animate-ping" />
+                <span>
+                  {pendingAction.actionText} <strong className="text-[#7e22ce] font-semibold">{countdown}s</strong>
+                </span>
+              </div>
+
+              {/* Immediate Proceed / Stay Buttons */}
+              <div className="flex items-center gap-2 w-full pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const run = pendingAction.execute;
+                    setPendingAction(null);
+                    run();
+                  }}
+                  className="flex-1 py-2 px-3 rounded-full bg-gradient-to-r from-[#581c87] to-[#7e22ce] text-white text-xs font-sans font-semibold tracking-normal shadow-md hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+                >
+                  Proceed now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPendingAction(null)}
+                  className="py-2 px-4 rounded-full bg-white/50 text-[#3b0764] text-xs font-sans font-medium hover:bg-white/70 transition-all cursor-pointer"
+                >
+                  Stay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

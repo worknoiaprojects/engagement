@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
-import { MapPin, Download, Share2, ChevronDown, Heart, X } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
 
 interface PendingAction {
   type: 'directions' | 'share' | 'download';
@@ -23,7 +19,6 @@ export const CinematicScroller: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const finalCardRef = useRef<HTMLImageElement | null>(null);
-  const hintRef = useRef<HTMLDivElement | null>(null);
   const leftActionsRef = useRef<HTMLDivElement | null>(null);
   const rightActionsRef = useRef<HTMLDivElement | null>(null);
 
@@ -31,7 +26,6 @@ export const CinematicScroller: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [totalFrames, setTotalFrames] = useState(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
-  const hasCelebratedRef = useRef(false);
 
   // Heartfelt Action Confirmation Modal State
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -111,30 +105,13 @@ export const CinematicScroller: React.FC = () => {
   useEffect(() => {
     if (!isLoaded || !canvasRef.current || !containerRef.current || totalFrames === 0) return;
 
-    // A. Lenis smooth momentum scroller
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-    });
-
-    lenis.on('scroll', ScrollTrigger.update);
-
-    const tickerFn = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(tickerFn);
-    gsap.ticker.lagSmoothing(0);
-
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     const playhead = { frame: 0 };
 
-    // B. Crystal Clear 100% Native Edge-to-Edge Buffer
+    // A. Crystal Clear 100% Native Edge-to-Edge Buffer
     const resizeCanvas = () => {
       if (!containerRef.current || !canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -148,7 +125,7 @@ export const CinematicScroller: React.FC = () => {
       render(playhead.frame);
     };
 
-    // C. Dual-Frame Blending Engine (Smooth 120 FPS Sub-pixel Transition)
+    // B. Dual-Frame Blending Engine (Smooth Sub-pixel Transition)
     const render = (frameFloat: number) => {
       const clamped = Math.max(0, Math.min(frameFloat, totalFrames - 1));
       const floorIdx = Math.floor(clamped);
@@ -188,53 +165,16 @@ export const CinematicScroller: React.FC = () => {
     // Initial first-frame render
     render(0);
 
-    // D. Master Cinematic Scroll Timeline
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top top',
-        end: '+=400%',
-        pin: true,
-        scrub: 0.25,
-        onUpdate: (self) => {
-          // Trigger celebratory petals once when reaching the final merged card
-          if (self.progress > 0.88 && !hasCelebratedRef.current) {
-            hasCelebratedRef.current = true;
-            confetti({
-              particleCount: 40,
-              spread: 70,
-              origin: { y: 0.85 },
-              colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#f3e8ff', '#fef08a'],
-              disableForReducedMotion: true,
-            });
-          } else if (self.progress < 0.75) {
-            hasCelebratedRef.current = false;
-          }
-        },
-      },
-    });
+    // C. Master Cinematic Timeline (Plays automatically on first scroll gesture)
+    const playTimeline = gsap.timeline({ paused: true });
 
-    // 1. Initial scroll prompt fades away on first gesture
-    if (hintRef.current) {
-      tl.to(
-        hintRef.current,
-        {
-          opacity: 0,
-          y: 20,
-          ease: 'power1.out',
-          duration: 0.35,
-        },
-        0
-      );
-    }
-
-    // 2. Video frames scrub through the entire animated invitation
-    tl.to(
+    // 1. Video frames automatically play smoothly through the entire animated invitation
+    playTimeline.to(
       playhead,
       {
         frame: totalFrames - 1,
-        ease: 'none',
-        duration: 3.2,
+        ease: 'power1.inOut',
+        duration: 3.8,
         onUpdate: () => {
           render(playhead.frame);
         },
@@ -242,59 +182,127 @@ export const CinematicScroller: React.FC = () => {
       0
     );
 
-    // 3. Final Card Merging:
-    // Crossfades into the ultra-sharp, uncompressed full-screen card
-    // as the video settles at its conclusion (merging into the still image)
+    // 2. Final Card Merging: Crossfades smoothly into ultra-sharp uncompressed card
     if (finalCardRef.current) {
-      tl.fromTo(
+      playTimeline.fromTo(
         finalCardRef.current,
         { opacity: 0 },
         {
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 0.85,
+          duration: 0.9,
         },
-        2.55 // overlaps gracefully with the animation finale
+        2.9
       );
     }
 
-    // 4. Interactive Side Floating Buttons glide in when invitation is fully merged
+    // 3. Celebratory confetti petals burst when invitation card reveals
+    playTimeline.call(
+      () => {
+        confetti({
+          particleCount: 50,
+          spread: 75,
+          origin: { y: 0.85 },
+          colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#f3e8ff', '#fef08a'],
+          disableForReducedMotion: true,
+        });
+      },
+      [],
+      3.3
+    );
+
+    // 4. Interactive Side Floating Buttons glide in
     if (leftActionsRef.current) {
-      tl.fromTo(
+      playTimeline.fromTo(
         leftActionsRef.current,
-        { opacity: 0, x: -25, pointerEvents: 'none' },
+        { opacity: 0, x: -30, pointerEvents: 'none' },
         {
           opacity: 1,
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 0.55,
+          duration: 0.6,
         },
-        3.35
+        3.5
       );
     }
 
     if (rightActionsRef.current) {
-      tl.fromTo(
+      playTimeline.fromTo(
         rightActionsRef.current,
-        { opacity: 0, x: 25, pointerEvents: 'none' },
+        { opacity: 0, x: 30, pointerEvents: 'none' },
         {
           opacity: 1,
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 0.55,
+          duration: 0.6,
         },
-        3.35
+        3.5
       );
     }
 
+    let hasStarted = false;
+    const startCinematicPlay = () => {
+      if (hasStarted) return;
+      hasStarted = true;
+      playTimeline.play();
+    };
+
+    // Detect slight scroll on desktop (wheel)
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > 2 || Math.abs(e.deltaX) > 2) {
+        startCinematicPlay();
+      }
+    };
+
+    // Detect slight swipe/scroll on mobile (touchmove)
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      if (Math.abs(touchStartY - currentY) > 5) {
+        startCinematicPlay();
+      }
+    };
+
+    // Detect scroll event (if page has any scroll offset)
+    const onScroll = () => {
+      if (window.scrollY > 2) {
+        startCinematicPlay();
+      }
+    };
+
+    // Detect keyboard navigation
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'ArrowUp', 'Space', 'PageDown', 'PageUp'].includes(e.code)) {
+        startCinematicPlay();
+      }
+    };
+
+    // Detect direct click/tap on screen
+    const onPointerDown = () => {
+      startCinematicPlay();
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('pointerdown', onPointerDown);
+
     return () => {
-      tl.kill();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      gsap.ticker.remove(tickerFn);
-      lenis.destroy();
+      playTimeline.kill();
       window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('pointerdown', onPointerDown);
     };
   }, [isLoaded, totalFrames]);
 
@@ -543,18 +551,7 @@ export const CinematicScroller: React.FC = () => {
           className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-48 h-32 z-20 cursor-pointer rounded-2xl focus:outline-none transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex items-center justify-center pointer-events-auto"
         />
 
-        {/* Initial Scroll Hint Indicator (Disappears immediately on scroll) */}
-        <div
-          ref={hintRef}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none transition-transform"
-        >
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full apple-liquid-glass shadow-md">
-            <span className="text-[11px] font-sans font-medium text-[#2e0854] tracking-normal">
-              Scroll to explore invitation
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-[#7e22ce] animate-bounce" />
-          </div>
-        </div>
+
 
         {/* Left Side Floating Capsule: Directions & Share (Edge Flush Downward Slanted Pill with Straight Vertical Icons) */}
         <div

@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
-import { MapPin, Download, Share2, Heart, X, Music } from 'lucide-react';
+import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -101,19 +101,6 @@ export const CinematicScroller: React.FC = () => {
       });
     };
   }, []);
-
-  const toggleAudio = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (audio.paused) {
-      unlockAndPlay();
-    } else {
-      audio.pause();
-      setIsAudioPlaying(false);
-    }
-  };
 
   // 2. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -655,38 +642,11 @@ export const CinematicScroller: React.FC = () => {
           <source src="/audio/bgm.mp3" type="audio/mpeg" />
         </audio>
 
-        {/* Floating Ambient Music Control (SVSC Title BGM) */}
-        <button
-          type="button"
-          onClick={toggleAudio}
-          title={isAudioPlaying ? 'Pause Background Music' : 'Play Background Music'}
-          className="absolute top-4 right-4 z-40 apple-liquid-glass px-2.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer text-[#2e0854] hover:text-[#7e22ce] transition-all shadow-lg active:scale-95 select-none pointer-events-auto"
-        >
-          {isAudioPlaying ? (
-            <>
-              <div className="flex items-center gap-0.5 h-3">
-                <span className="w-0.5 h-3 bg-[#7e22ce] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-0.5 h-2 bg-[#9333ea] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-0.5 h-3 bg-[#7e22ce] rounded-full animate-bounce [animation-delay:-0.45s]" />
-              </div>
-              <Music className="w-3.5 h-3.5 text-[#7e22ce]" />
-            </>
-          ) : (
-            <>
-              <Music className="w-3.5 h-3.5 text-[#7e22ce] animate-pulse" />
-              <span className="text-[10px] font-sans font-medium text-[#6b21a8] pr-0.5">
-                Tap for Music
-              </span>
-            </>
-          )}
-        </button>
-
         {/* Full-Screen First-Tap Audio Unlock Hotspot (Disappears instantly once playing) */}
         {!isAudioPlaying && (
           <div
             onClick={unlockAndPlay}
             className="absolute inset-0 z-20 cursor-pointer pointer-events-auto"
-            title="Tap anywhere to enjoy with music"
           />
         )}
 

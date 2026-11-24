@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
-import { Calendar, MapPin, Download, Share2, ChevronDown } from 'lucide-react';
+import { MapPin, Download, Share2, ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,7 +17,8 @@ export const CinematicScroller: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const finalCardRef = useRef<HTMLImageElement | null>(null);
   const hintRef = useRef<HTMLDivElement | null>(null);
-  const actionsRef = useRef<HTMLDivElement | null>(null);
+  const leftActionsRef = useRef<HTMLDivElement | null>(null);
+  const rightActionsRef = useRef<HTMLDivElement | null>(null);
 
   const [loadProgress, setLoadProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -241,14 +242,29 @@ export const CinematicScroller: React.FC = () => {
       );
     }
 
-    // 4. Interactive Action Dock smoothly glides up when the invitation is fully merged
-    if (actionsRef.current) {
+    // 4. Interactive Side Floating Buttons glide in when invitation is fully merged
+    if (leftActionsRef.current) {
       tl.fromTo(
-        actionsRef.current,
-        { opacity: 0, y: 35, pointerEvents: 'none' },
+        leftActionsRef.current,
+        { opacity: 0, x: -25, pointerEvents: 'none' },
         {
           opacity: 1,
-          y: 0,
+          x: 0,
+          pointerEvents: 'auto',
+          ease: 'power2.out',
+          duration: 0.55,
+        },
+        3.35
+      );
+    }
+
+    if (rightActionsRef.current) {
+      tl.fromTo(
+        rightActionsRef.current,
+        { opacity: 0, x: 25, pointerEvents: 'none' },
+        {
+          opacity: 1,
+          x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
           duration: 0.55,
@@ -265,36 +281,6 @@ export const CinematicScroller: React.FC = () => {
       window.removeEventListener('resize', resizeCanvas);
     };
   }, [isLoaded, totalFrames]);
-
-  // Calendar Event (.ics download)
-  const handleAddToCalendar = () => {
-    const icsContent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Suvarna & Rajesh//Wedding Engagement//EN',
-      'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH',
-      'BEGIN:VEVENT',
-      'SUMMARY:Engagement Ceremony: Suvarna & Rajesh',
-      'DESCRIPTION:With the blessings of our parents and elders, you are warmly invited to celebrate the engagement ceremony of Suvarna and Rajesh.',
-      'LOCATION:Vemulawada, Telangana, India',
-      'DTSTART:20261126T023000Z',
-      'DTEND:20261126T063000Z',
-      'STATUS:CONFIRMED',
-      'END:VEVENT',
-      'END:VCALENDAR',
-    ].join('\r\n');
-
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Suvarna_Rajesh_Engagement.ics';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   // Save Card to Photos
   const handleSaveCard = () => {
@@ -380,89 +366,71 @@ export const CinematicScroller: React.FC = () => {
           type="button"
           onClick={handleGetDirections}
           title="Click to find venue directions on Google Maps"
-          className="absolute bottom-[4.5%] left-1/2 -translate-x-1/2 w-44 h-28 z-20 cursor-pointer rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7e22ce]/40 transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex flex-col items-center justify-center pointer-events-auto"
-        >
-          <span className="text-[11px] font-sans font-medium text-[#4c1d95] bg-white/95 px-2.5 py-1 rounded-full shadow-sm border border-purple-200">
-            Tap to open venue map
-          </span>
-        </button>
+          className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-48 h-32 z-20 cursor-pointer rounded-2xl focus:outline-none transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex items-center justify-center pointer-events-auto"
+        />
 
         {/* Initial Scroll Hint Indicator (Disappears immediately on scroll) */}
         <div
           ref={hintRef}
           className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none transition-transform"
         >
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full liquid-glass-dock shadow-md">
-            <span className="text-[11px] font-sans font-medium text-[#3b0764] tracking-normal">
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full apple-liquid-glass shadow-md">
+            <span className="text-[11px] font-sans font-medium text-[#2e0854] tracking-normal">
               Scroll to explore invitation
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-[#7e22ce] animate-bounce" />
           </div>
         </div>
 
-        {/* Floating Action Dock (Authentic VisionOS Liquid Glass) */}
+        {/* Left Side Floating Buttons: Directions & Share (Apple Liquid Glass) */}
         <div
-          ref={actionsRef}
-          className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-[320px] px-3 pointer-events-none opacity-0"
+          ref={leftActionsRef}
+          className="absolute left-3 sm:left-6 top-[54%] -translate-y-1/2 z-30 flex flex-col items-center gap-3.5 pointer-events-none opacity-0"
         >
-          <div className="flex items-center justify-around gap-1 px-3 py-2 rounded-full liquid-glass-dock pointer-events-auto">
-            {/* Directions */}
-            <button
-              type="button"
-              onClick={handleGetDirections}
-              className="liquid-glass-item flex flex-col items-center gap-0.5 px-2.5 py-1 text-[#2e0854] hover:text-[#7e22ce] rounded-full active:scale-95"
-            >
-              <MapPin className="w-4 h-4 text-[#7e22ce]" />
-              <span className="text-[10px] font-sans font-semibold tracking-normal">
-                Directions
-              </span>
-            </button>
+          {/* Directions */}
+          <button
+            type="button"
+            onClick={handleGetDirections}
+            title="Directions"
+            className="apple-liquid-glass w-13 h-13 rounded-full flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-lg"
+          >
+            <MapPin className="w-4.5 h-4.5 text-[#2e0854]" />
+            <span className="text-[8.5px] font-sans font-semibold tracking-normal text-[#2e0854] leading-none mt-0.5">
+              Directions
+            </span>
+          </button>
 
-            {/* Subtle Glass Divider */}
-            <div className="w-[1px] h-5 bg-white/40" />
+          {/* Share */}
+          <button
+            type="button"
+            onClick={handleShare}
+            title="Share"
+            className="apple-liquid-glass w-13 h-13 rounded-full flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-lg"
+          >
+            <Share2 className="w-4.5 h-4.5 text-[#2e0854]" />
+            <span className="text-[8.5px] font-sans font-semibold tracking-normal text-[#2e0854] leading-none mt-0.5">
+              Share
+            </span>
+          </button>
+        </div>
 
-            {/* Add to Calendar */}
-            <button
-              type="button"
-              onClick={handleAddToCalendar}
-              className="liquid-glass-item flex flex-col items-center gap-0.5 px-2.5 py-1 text-[#2e0854] hover:text-[#7e22ce] rounded-full active:scale-95"
-            >
-              <Calendar className="w-4 h-4 text-[#7e22ce]" />
-              <span className="text-[10px] font-sans font-semibold tracking-normal">
-                Calendar
-              </span>
-            </button>
-
-            {/* Subtle Glass Divider */}
-            <div className="w-[1px] h-5 bg-white/40" />
-
-            {/* Save Card */}
-            <button
-              type="button"
-              onClick={handleSaveCard}
-              className="liquid-glass-item flex flex-col items-center gap-0.5 px-2.5 py-1 text-[#2e0854] hover:text-[#7e22ce] rounded-full active:scale-95"
-            >
-              <Download className="w-4 h-4 text-[#7e22ce]" />
-              <span className="text-[10px] font-sans font-semibold tracking-normal">
-                Save Card
-              </span>
-            </button>
-
-            {/* Subtle Glass Divider */}
-            <div className="w-[1px] h-5 bg-white/40" />
-
-            {/* Share */}
-            <button
-              type="button"
-              onClick={handleShare}
-              className="liquid-glass-item flex flex-col items-center gap-0.5 px-2.5 py-1 text-[#2e0854] hover:text-[#7e22ce] rounded-full active:scale-95"
-            >
-              <Share2 className="w-4 h-4 text-[#7e22ce]" />
-              <span className="text-[10px] font-sans font-semibold tracking-normal">
-                Share
-              </span>
-            </button>
-          </div>
+        {/* Right Side Floating Button: Download Card (Apple Liquid Glass) */}
+        <div
+          ref={rightActionsRef}
+          className="absolute right-3 sm:right-6 top-[62%] -translate-y-1/2 z-30 flex flex-col items-center pointer-events-none opacity-0"
+        >
+          {/* Download Card */}
+          <button
+            type="button"
+            onClick={handleSaveCard}
+            title="Save Card"
+            className="apple-liquid-glass w-13 h-13 rounded-full flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-lg"
+          >
+            <Download className="w-4.5 h-4.5 text-[#2e0854]" />
+            <span className="text-[8.5px] font-sans font-semibold tracking-normal text-[#2e0854] leading-none mt-0.5">
+              Save Card
+            </span>
+          </button>
         </div>
       </div>
     </div>

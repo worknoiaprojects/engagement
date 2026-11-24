@@ -216,7 +216,13 @@ export const CinematicScroller: React.FC = () => {
       if (!containerRef.current || !canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const w = containerRef.current.clientWidth || window.innerWidth;
-      const h = containerRef.current.clientHeight || window.innerHeight;
+      const maxH = Math.max(
+        window.innerHeight,
+        containerRef.current.clientHeight,
+        typeof screen !== 'undefined' ? screen.availHeight : 0,
+        typeof screen !== 'undefined' ? screen.height : 0
+      );
+      const h = maxH || window.innerHeight;
 
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
@@ -243,9 +249,10 @@ export const CinematicScroller: React.FC = () => {
       ctx.fillStyle = '#0b0314';
       ctx.fillRect(0, 0, cw, ch);
 
-      // Full edge-to-edge cover positioning (Zero white lines, zero borders)
-      const hRatio = cw / imgA.width;
-      const vRatio = ch / imgA.height;
+      // Full edge-to-edge cover positioning with 8% height zoom (Guarantees ZERO black screen at bottom)
+      const zoom = 1.08;
+      const hRatio = (cw / imgA.width) * zoom;
+      const vRatio = (ch / imgA.height) * zoom;
       const ratio = Math.max(hRatio, vRatio);
       const drawW = imgA.width * ratio;
       const drawH = imgA.height * ratio;
@@ -498,18 +505,28 @@ export const CinematicScroller: React.FC = () => {
     const link = document.createElement('a');
     link.href = '/images/final_card.png';
     link.download = 'Suvarna_Rajesh_Engagement_Invitation.png';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 150);
   };
 
-  // Google Maps Directions
+  // Google Maps Directions (Forces open without browser popup blocker interference)
   const handleGetDirectionsReal = () => {
-    window.open(
-      'https://www.google.com/maps/search/?api=1&query=V4HW%2BRX4+Vemulawada%2C+Andhra+Pradesh',
-      '_blank',
-      'noopener,noreferrer'
-    );
+    const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=V4HW%2BRX4+Vemulawada%2C+Andhra+Pradesh';
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.assign(mapsUrl);
+    } else {
+      const win = window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+      if (!win || win.closed || typeof win.closed === 'undefined') {
+        window.location.assign(mapsUrl);
+      }
+    }
   };
 
   // Share Invitation (Native Share Sheet with Reliable Clipboard Fallback)
@@ -616,12 +633,16 @@ export const CinematicScroller: React.FC = () => {
 
       {/* 
         Full-Screen Viewport (Mobile-Locked Format, Max 440px on Desktop)
-        ZERO white lines, 100% full-bleed edge-to-edge on mobile
+        ZERO white lines, 100% full-bleed edge-to-edge on mobile with 100lvh height
       */}
       <div
         ref={containerRef}
-        style={{ touchAction: 'pan-y' }}
-        className="relative w-full max-w-[440px] h-[100dvh] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
+        style={{
+          touchAction: 'pan-y',
+          height: '100lvh',
+          minHeight: '100dvh',
+        }}
+        className="relative w-full max-w-[440px] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
       >
         {/* Continuous Background Music Stream (Dual Native AAC & MP3 for 100% Mobile Compatibility) */}
         <audio
@@ -669,21 +690,23 @@ export const CinematicScroller: React.FC = () => {
           />
         )}
 
-        {/* Full-Screen Video Canvas (Edge-to-Edge) */}
+        {/* Full-Screen Video Canvas (Edge-to-Edge with 8% Height Zoom Overfill) */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-cover block pointer-events-none"
+          style={{ height: '100lvh', minHeight: '100%' }}
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none scale-[1.08] origin-center"
         />
 
         {/* 
-          High-Resolution Final Merged Card Image (Edge-to-Edge)
+          High-Resolution Final Merged Card Image (Edge-to-Edge with 8% Height Zoom Overfill)
           Crossfades smoothly over the canvas when the video animation completes
         */}
         <img
           ref={finalCardRef}
           src="/images/final_card_1080.webp"
           alt="Engagement Invitation - Suvarna & Rajesh"
-          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 will-change-opacity select-none"
+          style={{ height: '100lvh', minHeight: '100%' }}
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 will-change-opacity select-none scale-[1.08] origin-center"
         />
 
         {/* QR Code Touch Hotspot (Opens Directions to Vemulawada) */}
@@ -757,7 +780,7 @@ export const CinematicScroller: React.FC = () => {
         return (
           <div 
             onClick={() => handleCloseModal(false)}
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 popup-modal-backdrop ${
+            className={`fixed inset-0 z-[100] flex items-center justify-center p-4 popup-modal-backdrop ${
               isClosing ? 'closing' : 'entering'
             }`}
           >

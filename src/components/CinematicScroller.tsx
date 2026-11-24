@@ -35,7 +35,7 @@ export const CinematicScroller: React.FC = () => {
 
   // Heartfelt Action Confirmation Modal State
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(13);
   const [isClosing, setIsClosing] = useState(false);
   const isClosingRef = useRef(false);
   const [typedText, setTypedText] = useState('');
@@ -333,44 +333,44 @@ export const CinematicScroller: React.FC = () => {
           currentText += prefix[charIndex];
           setTypedText(currentText);
           charIndex++;
-          timeoutId = setTimeout(step, 42);
+          timeoutId = setTimeout(step, 48);
         } else {
           phase = 'typing_typo';
           charIndex = 0;
-          timeoutId = setTimeout(step, 50);
+          timeoutId = setTimeout(step, 55);
         }
       } else if (phase === 'typing_typo') {
         if (charIndex < typo.length) {
           currentText += typo[charIndex];
           setTypedText(currentText);
           charIndex++;
-          timeoutId = setTimeout(step, 48);
+          timeoutId = setTimeout(step, 52);
         } else {
           phase = 'pause_before_backspace';
-          timeoutId = setTimeout(step, 550); // Thoughtful pause before backspace
+          timeoutId = setTimeout(step, 650); // Thoughtful pause before backspace
         }
       } else if (phase === 'pause_before_backspace') {
         phase = 'backspacing';
-        timeoutId = setTimeout(step, 65);
+        timeoutId = setTimeout(step, 75);
       } else if (phase === 'backspacing') {
         if (currentText.length > prefix.length) {
           currentText = currentText.slice(0, -1);
           setTypedText(currentText);
-          timeoutId = setTimeout(step, 65); // Deliberate, graceful 8-letter deletion
+          timeoutId = setTimeout(step, 75); // Deliberate, graceful 8-letter deletion
         } else {
           phase = 'pause_before_resume';
-          timeoutId = setTimeout(step, 350); // Pause before typing true sentiment
+          timeoutId = setTimeout(step, 400); // Pause before typing true sentiment
         }
       } else if (phase === 'pause_before_resume') {
         phase = 'typing_suffix';
         charIndex = 0;
-        timeoutId = setTimeout(step, 50);
+        timeoutId = setTimeout(step, 55);
       } else if (phase === 'typing_suffix') {
         if (charIndex < suffix.length) {
           currentText += suffix[charIndex];
           setTypedText(currentText);
           charIndex++;
-          timeoutId = setTimeout(step, 40);
+          timeoutId = setTimeout(step, 46);
         } else {
           phase = 'done';
           setIsTypingDone(true);
@@ -379,7 +379,7 @@ export const CinematicScroller: React.FC = () => {
     };
 
     // Begin typing calmly after slow 1.25s modal expansion settles
-    timeoutId = setTimeout(step, 1050);
+    timeoutId = setTimeout(step, 1100);
 
     return () => {
       isCancelled = true;
@@ -487,7 +487,7 @@ export const CinematicScroller: React.FC = () => {
       execute = handleShareReal;
     }
 
-    setCountdown(10);
+    setCountdown(13);
     setIsClosing(false);
     isClosingRef.current = false;
     setPendingAction({ type, title, actionText, execute });

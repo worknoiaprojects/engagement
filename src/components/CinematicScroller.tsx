@@ -40,6 +40,7 @@ export const CinematicScroller: React.FC = () => {
   const isClosingRef = useRef(false);
   const [typedText, setTypedText] = useState('');
   const [isTypingDone, setIsTypingDone] = useState(false);
+  const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
 
   // 1. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -378,7 +379,7 @@ export const CinematicScroller: React.FC = () => {
     };
 
     // Begin typing softly after modal bloom completes
-    timeoutId = setTimeout(step, 320);
+    timeoutId = setTimeout(step, 650);
 
     return () => {
       isCancelled = true;
@@ -397,11 +398,12 @@ export const CinematicScroller: React.FC = () => {
     setTimeout(() => {
       setPendingAction(null);
       setIsClosing(false);
+      setClickOrigin(null);
       isClosingRef.current = false;
       if (actionToRun) {
         actionToRun();
       }
-    }, 380);
+    }, 450);
   };
 
   // Heartfelt Action Countdown Timer (10 Seconds)
@@ -458,7 +460,19 @@ export const CinematicScroller: React.FC = () => {
   };
 
   // Trigger Liquid Glass Popup before action execution
-  const triggerActionWithModal = (type: 'directions' | 'share' | 'download') => {
+  const triggerActionWithModal = (
+    type: 'directions' | 'share' | 'download',
+    event?: React.MouseEvent
+  ) => {
+    if (event) {
+      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      setClickOrigin({ x, y });
+    } else {
+      setClickOrigin(null);
+    }
+
     let title = 'Venue Directions';
     let actionText = 'Opening Google Maps in';
     let execute = handleGetDirectionsReal;
@@ -524,7 +538,7 @@ export const CinematicScroller: React.FC = () => {
         {/* QR Code Touch Hotspot (Opens Directions to Vemulawada) */}
         <button
           type="button"
-          onClick={() => triggerActionWithModal('directions')}
+          onClick={(e) => triggerActionWithModal('directions', e)}
           title="Click to find venue directions on Google Maps"
           className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-48 h-32 z-20 cursor-pointer rounded-2xl focus:outline-none transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex items-center justify-center pointer-events-auto"
         />
@@ -553,7 +567,7 @@ export const CinematicScroller: React.FC = () => {
               {/* Directions Icon (Darker Royal Purple with Lavender Hover) */}
               <button
                 type="button"
-                onClick={() => triggerActionWithModal('directions')}
+                onClick={(e) => triggerActionWithModal('directions', e)}
                 title="Directions to Venue"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 hover:bg-white/55 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
               >
@@ -566,7 +580,7 @@ export const CinematicScroller: React.FC = () => {
               {/* Share Icon (Darker Royal Purple with Lavender Hover) */}
               <button
                 type="button"
-                onClick={() => triggerActionWithModal('share')}
+                onClick={(e) => triggerActionWithModal('share', e)}
                 title="Share Invitation"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/35 hover:bg-white/55 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
               >
@@ -583,7 +597,7 @@ export const CinematicScroller: React.FC = () => {
         >
           <button
             type="button"
-            onClick={() => triggerActionWithModal('download')}
+            onClick={(e) => triggerActionWithModal('download', e)}
             title="Save Invitation Card"
             className="apple-liquid-glass w-[78px] sm:w-[86px] h-[58px] sm:h-[64px] rounded-l-[32px] rounded-r-none border-r-0 flex items-center justify-start pl-3.5 cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-2xl rotate-[24deg] origin-right transition-all group"
           >
@@ -596,73 +610,82 @@ export const CinematicScroller: React.FC = () => {
       </div>
 
       {/* Heartfelt Clear Liquid Glass Popup Modal (Lavender Typography & Typing Animation) */}
-      {pendingAction && (
-        <div 
-          onClick={() => handleCloseModal(false)}
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent popup-modal-backdrop ${
-            isClosing ? 'closing opacity-0' : 'entering opacity-100'
-          }`}
-        >
+      {pendingAction && (() => {
+        const startX = clickOrigin ? Math.round(clickOrigin.x - window.innerWidth / 2) : 0;
+        const startY = clickOrigin ? Math.round(clickOrigin.y - window.innerHeight / 2) : 0;
+
+        return (
           <div 
-            onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-[380px] p-6 rounded-[36px] apple-liquid-glass-modal popup-modal-card relative shadow-2xl flex flex-col items-center text-center space-y-4 ${
-              isClosing ? 'modal-exit' : 'modal-enter'
+            onClick={() => handleCloseModal(false)}
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 popup-modal-backdrop ${
+              isClosing ? 'closing' : 'entering'
             }`}
           >
-            {/* Close Button (No Border, Box Shadow Only) */}
-            <button
-              type="button"
-              onClick={() => handleCloseModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(46,8,84,0.12)] hover:shadow-[0_4px_14px_rgba(46,8,84,0.18)] text-[#581c87] hover:text-[#2e0854] transition-all cursor-pointer"
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                '--start-x': `${startX}px`,
+                '--start-y': `${startY}px`,
+              } as React.CSSProperties}
+              className={`w-full max-w-[340px] sm:max-w-[350px] p-5 sm:p-5.5 rounded-[30px] apple-liquid-glass-modal popup-modal-card relative shadow-2xl flex flex-col items-center text-center space-y-3 ${
+                isClosing ? 'modal-exit-origin' : 'modal-enter-origin'
+              }`}
             >
-              <X className="w-4 h-4 text-[#581c87]" />
-            </button>
-
-            {/* Heart Badge (No Border, Box Shadow Only) */}
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white shadow-[0_2px_10px_rgba(46,8,84,0.08)]">
-              <Heart className="w-3.5 h-3.5 text-[#7e22ce] fill-[#7e22ce]" />
-              <span className="text-[11px] font-sans font-semibold text-[#6b21a8] tracking-normal">
-                With Our Blessings
-              </span>
-            </div>
-
-            {/* Headline (Deep Royal Purple) */}
-            <h3 className="font-heading text-xl text-[#2e0854] font-semibold tracking-normal leading-snug drop-shadow-xs">
-              Thank you for your warm love &amp; blessings
-            </h3>
-
-            {/* Emotional Couple Message with Human Typing & Backspace Animation (Deep Lavender) */}
-            <div className="w-full min-h-[96px] flex items-center justify-center px-1">
-              <p className="text-[13px] sm:text-sm font-sans text-[#4c1d95] font-medium leading-relaxed drop-shadow-xs">
-                &ldquo;{typedText}&rdquo;
-                {!isTypingDone && (
-                  <span className="inline-block w-0.5 h-3.5 ml-0.5 align-middle bg-[#7e22ce] animate-pulse" />
-                )}
-              </p>
-            </div>
-
-            {/* Couple Signature (Royal Lavender) */}
-            <div className="text-sm font-serif italic text-[#7e22ce] font-semibold">
-              — Suvarna &amp; Rajesh
-            </div>
-
-            {/* Timer & Execution Status Button (No Border, Box Shadow Only) */}
-            <div className="w-full pt-1 flex flex-col items-center">
+              {/* Close Button (No Border, Box Shadow Only) */}
               <button
                 type="button"
-                onClick={() => handleCloseModal(true)}
-                title="Click to proceed immediately"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-[0_4px_16px_rgba(46,8,84,0.1)] hover:shadow-[0_6px_20px_rgba(46,8,84,0.16)] active:scale-98 text-xs font-sans font-medium text-[#581c87] transition-all cursor-pointer"
+                onClick={() => handleCloseModal(false)}
+                className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-[0_2px_8px_rgba(46,8,84,0.12)] hover:shadow-[0_4px_12px_rgba(46,8,84,0.18)] text-[#581c87] hover:text-[#2e0854] transition-all cursor-pointer"
               >
-                <span className="w-2.5 h-2.5 rounded-full bg-[#7e22ce] animate-ping" />
-                <span>
-                  {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-sm ml-1">{countdown}s</strong>
-                </span>
+                <X className="w-3.5 h-3.5 text-[#581c87]" />
               </button>
+
+              {/* Heart Badge (Delicate, Reduced Font Size) */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-[0_2px_8px_rgba(46,8,84,0.08)]">
+                <Heart className="w-3 h-3 text-[#7e22ce] fill-[#7e22ce]" />
+                <span className="text-[10px] font-sans font-semibold text-[#6b21a8] tracking-normal">
+                  With Our Blessings
+                </span>
+              </div>
+
+              {/* Headline (Refined, Reduced Font Size) */}
+              <h3 className="font-heading text-base sm:text-[17px] text-[#2e0854] font-semibold tracking-normal leading-snug drop-shadow-xs px-2">
+                Thank you for your warm love &amp; blessings
+              </h3>
+
+              {/* Emotional Couple Message with Human Typing & Backspace Animation (Delicate, Reduced Font Size) */}
+              <div className="w-full min-h-[76px] flex items-center justify-center px-1">
+                <p className="text-xs sm:text-[12.5px] font-sans text-[#4c1d95] font-medium leading-relaxed drop-shadow-xs">
+                  &ldquo;{typedText}&rdquo;
+                  {!isTypingDone && (
+                    <span className="inline-block w-0.5 h-3 ml-0.5 align-middle bg-[#7e22ce] animate-pulse" />
+                  )}
+                </p>
+              </div>
+
+              {/* Couple Signature (Delicate, Reduced Font Size) */}
+              <div className="text-xs sm:text-[13px] font-serif italic text-[#7e22ce] font-semibold">
+                — Suvarna &amp; Rajesh
+              </div>
+
+              {/* Timer & Execution Status Button (Delicate, Reduced Font Size, No Border) */}
+              <div className="w-full pt-0.5 flex flex-col items-center">
+                <button
+                  type="button"
+                  onClick={() => handleCloseModal(true)}
+                  title="Click to proceed immediately"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-[0_3px_14px_rgba(46,8,84,0.1)] hover:shadow-[0_5px_18px_rgba(46,8,84,0.16)] active:scale-98 text-[11px] font-sans font-medium text-[#581c87] transition-all cursor-pointer"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#7e22ce] animate-ping" />
+                  <span>
+                    {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-xs ml-1">{countdown}s</strong>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

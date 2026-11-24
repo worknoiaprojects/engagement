@@ -79,42 +79,66 @@
    ---------------------------------------------------- */
 
 .popup-modal-backdrop {
-  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              -webkit-backdrop-filter 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup-modal-backdrop.entering {
+  opacity: 1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(30, 8, 50, 0.25);
+}
+
+.popup-modal-backdrop.closing {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  background-color: transparent;
+  pointer-events: none;
 }
 
 .popup-modal-card {
   transform-origin: center center;
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.35s ease-out,
-              filter 0.35s ease-out;
+  will-change: transform, opacity, filter;
 }
 
-.popup-modal-card.modal-enter {
-  animation: liquidModalBloomIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.popup-modal-card.modal-enter-origin {
+  animation: liquidModalExpandFromButton 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.popup-modal-card.modal-exit {
-  transform: scale(0.86) translateY(16px) !important;
-  opacity: 0 !important;
-  filter: blur(4px) !important;
-  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.35s ease-in,
-              filter 0.35s ease-in;
+.popup-modal-card.modal-exit-origin {
+  animation: liquidModalCollapseToButton 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes liquidModalBloomIn {
+@keyframes liquidModalExpandFromButton {
   0% {
     opacity: 0;
-    transform: scale(0.82) translateY(24px);
-    filter: blur(6px);
+    transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.1);
+    filter: blur(10px);
   }
-  65% {
-    transform: scale(1.02) translateY(-2px);
+  30% {
+    opacity: 0.7;
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
     filter: blur(0px);
+  }
+}
+
+@keyframes liquidModalCollapseToButton {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--start-x, 0px) * 0.4), calc(var(--start-y, 0px) * 0.4), 0) scale(0.35);
+    filter: blur(8px);
   }
 }
 

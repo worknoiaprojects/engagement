@@ -2,13 +2,19 @@ import { CinematicScroller } from './components/CinematicScroller';
 
 export default function App() {
   return (
-    <main className="bg-[#0b0314] min-h-screen text-[#2b0b3f] flex justify-center overflow-x-hidden">
+    <main className="bg-[#0b0314] min-h-screen text-[#2b0b3f] flex items-center justify-center overflow-x-hidden">
       {/* 
-        Mobile-Locked Invitation Format
-        Preserves 100% vertical mobile aspect ratio (max-w-[440px]) on desktop/tablet,
-        while stretching to full 100% edge-to-edge on mobile phones (down to 320px).
+        Dynamic Responsive Mobile-Locked Container
+        Dynamically adapts width and height with 9:16 aspect ratio up to 100dvh,
+        ensuring 100% full visibility with ZERO cut-off on any mobile or desktop device.
       */}
-      <div className="w-full max-w-[440px] min-h-screen relative shadow-[0_0_80px_rgba(0,0,0,0.85)] bg-white overflow-x-hidden">
+      <div
+        style={{
+          maxWidth: 'min(440px, 100vw, calc(100dvh * 9 / 16))',
+          height: 'min(100dvh, calc(100vw * 16 / 9))',
+        }}
+        className="w-full relative shadow-[0_0_80px_rgba(0,0,0,0.85)] bg-white overflow-hidden flex flex-col justify-center"
+      >
         <CinematicScroller />
       </div>
     </main>

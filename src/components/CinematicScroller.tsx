@@ -382,55 +382,68 @@ export const CinematicScroller: React.FC = () => {
           </div>
         </div>
 
-        {/* Left Side Floating Buttons: Directions & Share (Apple Liquid Glass) */}
+        {/* Left Side Floating Capsule: Directions & Share (Unified Apple Liquid Glass) */}
         <div
           ref={leftActionsRef}
-          className="absolute left-3 sm:left-6 top-[54%] -translate-y-1/2 z-30 flex flex-col items-center gap-3.5 pointer-events-none opacity-0"
+          className="absolute left-2.5 sm:left-6 top-[54%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
         >
-          {/* Directions */}
-          <button
-            type="button"
-            onClick={handleGetDirections}
-            title="Directions"
-            className="apple-liquid-glass w-13 h-13 rounded-full flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-lg"
-          >
-            <MapPin className="w-4.5 h-4.5 text-[#2e0854]" />
-            <span className="text-[8.5px] font-sans font-semibold tracking-normal text-[#2e0854] leading-none mt-0.5">
-              Directions
-            </span>
-          </button>
+          <div className="apple-liquid-glass w-[68px] sm:w-[76px] py-3 px-1 rounded-[32px] sm:rounded-[36px] flex flex-col items-center gap-1.5 pointer-events-auto shadow-2xl">
+            {/* Directions */}
+            <button
+              type="button"
+              onClick={handleGetDirections}
+              title="Directions to Venue"
+              className="apple-liquid-glass-btn w-full py-1.5 flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] group"
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-0.5 group-hover:bg-white/20 transition-colors">
+                <MapPin className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
+              </div>
+              <span className="text-[9px] font-sans font-semibold tracking-normal text-[#2e0854] leading-tight">
+                Directions
+              </span>
+            </button>
 
-          {/* Share */}
-          <button
-            type="button"
-            onClick={handleShare}
-            title="Share"
-            className="apple-liquid-glass w-13 h-13 rounded-full flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-lg"
-          >
-            <Share2 className="w-4.5 h-4.5 text-[#2e0854]" />
-            <span className="text-[8.5px] font-sans font-semibold tracking-normal text-[#2e0854] leading-none mt-0.5">
-              Share
-            </span>
-          </button>
+            {/* Delicate Glass Divider */}
+            <div className="w-8 h-[1px] bg-white/35" />
+
+            {/* Share */}
+            <button
+              type="button"
+              onClick={handleShare}
+              title="Share Invitation"
+              className="apple-liquid-glass-btn w-full py-1.5 flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] group"
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-0.5 group-hover:bg-white/20 transition-colors">
+                <Share2 className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
+              </div>
+              <span className="text-[9px] font-sans font-semibold tracking-normal text-[#2e0854] leading-tight">
+                Share
+              </span>
+            </button>
+          </div>
         </div>
 
-        {/* Right Side Floating Button: Download Card (Apple Liquid Glass) */}
+        {/* Right Side Floating Capsule: Download Card (Unified Apple Liquid Glass) */}
         <div
           ref={rightActionsRef}
-          className="absolute right-3 sm:right-6 top-[62%] -translate-y-1/2 z-30 flex flex-col items-center pointer-events-none opacity-0"
+          className="absolute right-2.5 sm:right-6 top-[62%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
         >
-          {/* Download Card */}
-          <button
-            type="button"
-            onClick={handleSaveCard}
-            title="Save Card"
-            className="apple-liquid-glass w-13 h-13 rounded-full flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] active:scale-95 pointer-events-auto shadow-lg"
-          >
-            <Download className="w-4.5 h-4.5 text-[#2e0854]" />
-            <span className="text-[8.5px] font-sans font-semibold tracking-normal text-[#2e0854] leading-none mt-0.5">
-              Save Card
-            </span>
-          </button>
+          <div className="apple-liquid-glass w-[68px] sm:w-[76px] py-3.5 px-1 rounded-[32px] sm:rounded-[36px] flex flex-col items-center justify-center pointer-events-auto shadow-2xl">
+            {/* Download Card */}
+            <button
+              type="button"
+              onClick={handleSaveCard}
+              title="Save Invitation Card"
+              className="apple-liquid-glass-btn w-full py-1.5 flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] group"
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-0.5 group-hover:bg-white/20 transition-colors">
+                <Download className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
+              </div>
+              <span className="text-[9px] font-sans font-semibold tracking-normal text-[#2e0854] leading-tight text-center">
+                Save Card
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

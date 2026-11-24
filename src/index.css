@@ -17,7 +17,7 @@
   }
 
   body {
-    background-color: #ffffff;
+    background-color: #0b0314;
     color: #2b0b3f;
     font-family: var(--font-sans);
   }
@@ -264,4 +264,58 @@
 
 .font-sans-editorial {
   font-family: var(--font-sans);
+}
+
+/* ----------------------------------------------------
+   LUXURY COUPLE NAME SHIMMER & LOADING ANIMATION
+   ---------------------------------------------------- */
+
+.name-shimmer {
+  background: linear-gradient(
+    110deg,
+    #2e0854 0%,
+    #4c1d95 20%,
+    #7e22ce 35%,
+    #f3e8ff 48%,
+    #ffffff 52%,
+    #d8b4fe 65%,
+    #581c87 80%,
+    #2e0854 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: luxuryNameShimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: drop-shadow(0 2px 8px rgba(126, 34, 206, 0.2));
+}
+
+@keyframes luxuryNameShimmer {
+  0% {
+    background-position: 180% 0;
+  }
+  100% {
+    background-position: -180% 0;
+  }
+}
+
+.shimmer-progress-bar {
+  background: linear-gradient(
+    90deg,
+    #7e22ce 0%,
+    #a855f7 35%,
+    #f5d0fe 50%,
+    #a855f7 65%,
+    #6b21a8 100%
+  );
+  background-size: 200% 100%;
+  animation: barShimmer 1.8s linear infinite;
+}
+
+@keyframes barShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

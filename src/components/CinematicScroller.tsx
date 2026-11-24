@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
 import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface PendingAction {
   type: 'directions' | 'share' | 'download';
@@ -26,6 +30,7 @@ export const CinematicScroller: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [totalFrames, setTotalFrames] = useState(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
+  const hasCelebratedRef = useRef(false);
 
   // Heartfelt Action Confirmation Modal State
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -105,13 +110,30 @@ export const CinematicScroller: React.FC = () => {
   useEffect(() => {
     if (!isLoaded || !canvasRef.current || !containerRef.current || totalFrames === 0) return;
 
+    // A. Lenis smooth momentum scroller
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+    });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    const tickerFn = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tickerFn);
+    gsap.ticker.lagSmoothing(0);
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     const playhead = { frame: 0 };
 
-    // A. Crystal Clear 100% Native Edge-to-Edge Buffer
+    // B. Crystal Clear 100% Native Edge-to-Edge Buffer
     const resizeCanvas = () => {
       if (!containerRef.current || !canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -125,7 +147,7 @@ export const CinematicScroller: React.FC = () => {
       render(playhead.frame);
     };
 
-    // B. Dual-Frame Blending Engine (Smooth Sub-pixel Transition)
+    // C. Dual-Frame Blending Engine (Smooth 120 FPS Sub-pixel Transition)
     const render = (frameFloat: number) => {
       const clamped = Math.max(0, Math.min(frameFloat, totalFrames - 1));
       const floorIdx = Math.floor(clamped);
@@ -165,16 +187,39 @@ export const CinematicScroller: React.FC = () => {
     // Initial first-frame render
     render(0);
 
-    // C. Master Cinematic Timeline (Plays automatically on first scroll gesture)
-    const playTimeline = gsap.timeline({ paused: true });
+    // D. Master Cinematic Scroll Timeline (Interactive Scroll-Driven Scrubbing)
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top top',
+        end: '+=400%',
+        pin: true,
+        scrub: 0.25,
+        onUpdate: (self) => {
+          // Trigger celebratory petals once when reaching the final merged card
+          if (self.progress > 0.88 && !hasCelebratedRef.current) {
+            hasCelebratedRef.current = true;
+            confetti({
+              particleCount: 50,
+              spread: 75,
+              origin: { y: 0.85 },
+              colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#f3e8ff', '#fef08a'],
+              disableForReducedMotion: true,
+            });
+          } else if (self.progress < 0.75) {
+            hasCelebratedRef.current = false;
+          }
+        },
+      },
+    });
 
-    // 1. Video frames automatically play very slowly, smoothly, and deliberately (14.0s slow-motion cinematic pace)
-    playTimeline.to(
+    // 1. Video frames scrub through the entire animated invitation
+    tl.to(
       playhead,
       {
         frame: totalFrames - 1,
-        ease: 'power1.inOut',
-        duration: 14.0,
+        ease: 'none',
+        duration: 3.2,
         onUpdate: () => {
           render(playhead.frame);
         },
@@ -182,38 +227,23 @@ export const CinematicScroller: React.FC = () => {
       0
     );
 
-    // 2. Final Card Merging: Crossfades smoothly into ultra-sharp uncompressed card
+    // 2. Final Card Merging: Crossfades into the ultra-sharp, uncompressed card
     if (finalCardRef.current) {
-      playTimeline.fromTo(
+      tl.fromTo(
         finalCardRef.current,
         { opacity: 0 },
         {
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 2.5,
+          duration: 0.85,
         },
-        11.0
+        2.55
       );
     }
 
-    // 3. Celebratory confetti petals burst when invitation card reveals
-    playTimeline.call(
-      () => {
-        confetti({
-          particleCount: 50,
-          spread: 75,
-          origin: { y: 0.85 },
-          colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#f3e8ff', '#fef08a'],
-          disableForReducedMotion: true,
-        });
-      },
-      [],
-      12.5
-    );
-
-    // 4. Interactive Side Floating Buttons glide in
+    // 3. Side Floating Buttons glide in when invitation is fully merged
     if (leftActionsRef.current) {
-      playTimeline.fromTo(
+      tl.fromTo(
         leftActionsRef.current,
         { opacity: 0, x: -30, pointerEvents: 'none' },
         {
@@ -221,14 +251,14 @@ export const CinematicScroller: React.FC = () => {
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 1.0,
+          duration: 0.55,
         },
-        13.0
+        3.35
       );
     }
 
     if (rightActionsRef.current) {
-      playTimeline.fromTo(
+      tl.fromTo(
         rightActionsRef.current,
         { opacity: 0, x: 30, pointerEvents: 'none' },
         {
@@ -236,73 +266,21 @@ export const CinematicScroller: React.FC = () => {
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 1.0,
+          duration: 0.55,
         },
-        13.0
+        3.35
       );
     }
 
-    let hasStarted = false;
-    const startCinematicPlay = () => {
-      if (hasStarted) return;
-      hasStarted = true;
-      playTimeline.play();
-    };
-
-    // Detect slight scroll on desktop (wheel)
-    const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > 2 || Math.abs(e.deltaX) > 2) {
-        startCinematicPlay();
-      }
-    };
-
-    // Detect slight swipe/scroll on mobile (touchmove)
-    let touchStartY = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      if (Math.abs(touchStartY - currentY) > 5) {
-        startCinematicPlay();
-      }
-    };
-
-    // Detect scroll event (if page has any scroll offset)
-    const onScroll = () => {
-      if (window.scrollY > 2) {
-        startCinematicPlay();
-      }
-    };
-
-    // Detect keyboard navigation
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowDown', 'ArrowUp', 'Space', 'PageDown', 'PageUp'].includes(e.code)) {
-        startCinematicPlay();
-      }
-    };
-
-    // Detect direct click/tap on screen
-    const onPointerDown = () => {
-      startCinematicPlay();
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: true });
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('pointerdown', onPointerDown);
+    // Refresh ScrollTrigger to ensure bounds align with locked mobile dimensions
+    ScrollTrigger.refresh();
 
     return () => {
-      playTimeline.kill();
+      tl.kill();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+      gsap.ticker.remove(tickerFn);
+      lenis.destroy();
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('pointerdown', onPointerDown);
     };
   }, [isLoaded, totalFrames]);
 
@@ -443,7 +421,7 @@ export const CinematicScroller: React.FC = () => {
   // Google Maps Directions
   const handleGetDirectionsReal = () => {
     window.open(
-      'https://www.google.com/maps/search/?api=1&query=Vemulawada+Sri+Raja+Rajeshwara+Swamy+Temple',
+      'https://www.google.com/maps/search/?api=1&query=V4HW%2BRX4+Vemulawada%2C+Andhra+Pradesh',
       '_blank',
       'noopener,noreferrer'
     );
@@ -502,25 +480,73 @@ export const CinematicScroller: React.FC = () => {
   };
 
   return (
-    <div className="relative bg-white text-[#2b0b3f] min-h-screen">
-      {/* Loading Overlay */}
+    <div className="relative bg-white text-[#2b0b3f] min-h-screen w-full">
+      {/* 
+        Luxury Shimmer Loading Overlay
+        Featuring Shimmering Names "SUVARNA ❤️ RAJESH" with Radiant Heart Love Icon
+      */}
       {!isLoaded && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white space-y-4">
-          <div className="w-14 h-14 rounded-full border-2 border-[#7e22ce]/20 border-t-[#7e22ce] animate-spin" />
-          <span className="font-heading text-xl text-[#3b0764] text-center px-4 font-semibold tracking-normal">
-            {totalFrames === 0 ? "Preparing Invitation" : "Loading Invitation"}
-          </span>
-          {totalFrames > 0 && (
-            <span className="text-xs font-sans text-[#7e22ce] font-medium tracking-normal">
-              {loadProgress}% Preloaded
-            </span>
-          )}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b0314]">
+          <div className="w-full max-w-[440px] h-full min-h-[100dvh] bg-white flex flex-col items-center justify-center p-6 shadow-2xl relative overflow-hidden select-none">
+            {/* Subtle Royal Aura Background */}
+            <div className="absolute top-1/4 -left-12 w-64 h-64 bg-purple-200/50 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-1/4 -right-12 w-64 h-64 bg-pink-100/50 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Central Shimmer Content */}
+            <div className="relative z-10 flex flex-col items-center justify-center space-y-4 text-center">
+              {/* Elegant Royal Pill */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-100/80 shadow-xs">
+                <Heart className="w-3 h-3 text-[#7e22ce] fill-[#7e22ce]" />
+                <span className="text-[10px] font-sans font-semibold text-[#6b21a8] uppercase tracking-widest">
+                  Engagement Celebration
+                </span>
+              </div>
+
+              {/* Shimmering Couple Names with Animated Love Heart Icon */}
+              <div className="flex items-center justify-center gap-2 sm:gap-2.5 flex-nowrap">
+                <span className="name-shimmer font-heading text-2xl sm:text-3xl font-bold tracking-wider">
+                  SUVARNA
+                </span>
+
+                <div className="relative flex items-center justify-center px-1">
+                  <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-[#9333ea] fill-[#a855f7] animate-pulse drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]" />
+                  <span className="absolute inset-0 rounded-full bg-purple-400/20 blur-xs animate-ping pointer-events-none" />
+                </div>
+
+                <span className="name-shimmer font-heading text-2xl sm:text-3xl font-bold tracking-wider">
+                  RAJESH
+                </span>
+              </div>
+
+              {/* Romantic Date & Venue Line */}
+              <div className="text-xs font-serif italic text-[#7e22ce]/90 font-medium tracking-wide">
+                26th November • Vemulawada
+              </div>
+
+              {/* Luxury Shimmer Progress Bar */}
+              <div className="w-56 max-w-[80vw] flex flex-col items-center space-y-2 pt-3">
+                <div className="w-full h-1.5 bg-purple-100/80 rounded-full overflow-hidden p-[1px] shadow-inner">
+                  <div
+                    className="h-full rounded-full transition-all duration-300 ease-out shimmer-progress-bar"
+                    style={{ width: `${Math.max(6, loadProgress)}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between w-full text-[11px] font-sans font-medium text-[#7e22ce]">
+                  <span className="tracking-wide">
+                    {totalFrames === 0 ? 'Preparing Invitation' : 'Loading Invitation'}
+                  </span>
+                  <span className="font-semibold">{loadProgress}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       {/* 
-        Full-Screen Viewport (100% Edge-to-Edge)
-        ZERO mobile borders, ZERO fake frames, ZERO notches — purely full-bleed
+        Full-Screen Viewport (100% Edge-to-Edge within Mobile Container)
+        ZERO mobile borders, ZERO fake frames, purely full-bleed
       */}
       <div
         ref={containerRef}

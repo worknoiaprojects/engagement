@@ -382,43 +382,33 @@ export const CinematicScroller: React.FC = () => {
           </div>
         </div>
 
-        {/* Left Side Floating Capsule: Directions & Share (Unified Apple Liquid Glass) */}
+        {/* Left Side Floating Capsule: Directions & Share (Edge Cut-Off Cross Tab with Symmetrical Upward Bend & Icon Only) */}
         <div
           ref={leftActionsRef}
-          className="absolute left-2.5 sm:left-6 top-[54%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
+          className="absolute -left-3 sm:-left-4 top-[54%] -translate-y-1/2 z-30 pointer-events-none opacity-0"
         >
-          <div className="apple-liquid-glass w-[68px] sm:w-[76px] py-3 px-1 rounded-[32px] sm:rounded-[36px] flex flex-col items-center gap-1.5 pointer-events-auto shadow-2xl">
-            {/* Directions */}
+          <div className="apple-liquid-glass w-[68px] sm:w-[74px] py-3.5 pr-3 pl-4 rounded-r-[32px] rounded-l-none border-l-0 flex flex-col items-center justify-center gap-2.5 pointer-events-auto shadow-2xl -rotate-[24deg] origin-left transition-all">
+            {/* Directions (Unrotated Icon) */}
             <button
               type="button"
               onClick={handleGetDirections}
               title="Directions to Venue"
-              className="apple-liquid-glass-btn w-full py-1.5 flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] group"
+              className="rotate-[24deg] w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/30 hover:bg-white/45 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
             >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-0.5 group-hover:bg-white/20 transition-colors">
-                <MapPin className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
-              </div>
-              <span className="text-[9px] font-sans font-semibold tracking-normal text-[#2e0854] leading-tight">
-                Directions
-              </span>
+              <MapPin className="w-5 h-5 text-[#2e0854] hover:text-[#7e22ce] transition-colors" />
             </button>
 
             {/* Delicate Glass Divider */}
-            <div className="w-8 h-[1px] bg-white/35" />
+            <div className="w-6 h-[1px] bg-white/35 rotate-[24deg]" />
 
-            {/* Share */}
+            {/* Share (Unrotated Icon) */}
             <button
               type="button"
               onClick={handleShare}
               title="Share Invitation"
-              className="apple-liquid-glass-btn w-full py-1.5 flex flex-col items-center justify-center cursor-pointer select-none text-[#2e0854] hover:text-[#7e22ce] group"
+              className="rotate-[24deg] w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/30 hover:bg-white/45 shadow-sm transition-colors cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95"
             >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-0.5 group-hover:bg-white/20 transition-colors">
-                <Share2 className="w-4.5 h-4.5 text-[#2e0854] group-hover:text-[#7e22ce] transition-colors" />
-              </div>
-              <span className="text-[9px] font-sans font-semibold tracking-normal text-[#2e0854] leading-tight">
-                Share
-              </span>
+              <Share2 className="w-5 h-5 text-[#2e0854] hover:text-[#7e22ce] transition-colors" />
             </button>
           </div>
         </div>

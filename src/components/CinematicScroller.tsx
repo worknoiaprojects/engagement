@@ -609,17 +609,17 @@ export const CinematicScroller: React.FC = () => {
               isClosing ? 'modal-exit' : 'modal-enter'
             }`}
           >
-            {/* Close Button */}
+            {/* Close Button (No Border, Box Shadow Only) */}
             <button
               type="button"
               onClick={() => handleCloseModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-purple-100/70 hover:bg-purple-200/90 text-[#581c87] border border-purple-200/80 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(46,8,84,0.12)] hover:shadow-[0_4px_14px_rgba(46,8,84,0.18)] text-[#581c87] hover:text-[#2e0854] transition-all cursor-pointer"
             >
               <X className="w-4 h-4 text-[#581c87]" />
             </button>
 
-            {/* Heart Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100/70 border border-purple-200/90 shadow-xs">
+            {/* Heart Badge (No Border, Box Shadow Only) */}
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white shadow-[0_2px_10px_rgba(46,8,84,0.08)]">
               <Heart className="w-3.5 h-3.5 text-[#7e22ce] fill-[#7e22ce]" />
               <span className="text-[11px] font-sans font-semibold text-[#6b21a8] tracking-normal">
                 With Our Blessings
@@ -646,14 +646,19 @@ export const CinematicScroller: React.FC = () => {
               — Suvarna &amp; Rajesh
             </div>
 
-            {/* Timer & Execution Status (10s Countdown) */}
+            {/* Timer & Execution Status Button (No Border, Box Shadow Only) */}
             <div className="w-full pt-1 flex flex-col items-center">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100/60 border border-purple-200/80 text-xs font-sans font-medium text-[#581c87] shadow-xs">
+              <button
+                type="button"
+                onClick={() => handleCloseModal(true)}
+                title="Click to proceed immediately"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-[0_4px_16px_rgba(46,8,84,0.1)] hover:shadow-[0_6px_20px_rgba(46,8,84,0.16)] active:scale-98 text-xs font-sans font-medium text-[#581c87] transition-all cursor-pointer"
+              >
                 <span className="w-2.5 h-2.5 rounded-full bg-[#7e22ce] animate-ping" />
                 <span>
                   {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-sm ml-1">{countdown}s</strong>
                 </span>
-              </div>
+              </button>
             </div>
           </div>
         </div>

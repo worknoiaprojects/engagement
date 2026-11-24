@@ -609,49 +609,49 @@ export const CinematicScroller: React.FC = () => {
               isClosing ? 'modal-exit' : 'modal-enter'
             }`}
           >
-            {/* Close Button (Soft Lavender) */}
+            {/* Close Button */}
             <button
               type="button"
               onClick={() => handleCloseModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-purple-900/30 hover:bg-purple-800/50 text-[#e9d5ff] hover:text-white border border-purple-400/30 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-purple-100/70 hover:bg-purple-200/90 text-[#581c87] border border-purple-200/80 transition-colors cursor-pointer"
             >
-              <X className="w-4 h-4 text-[#e9d5ff]" />
+              <X className="w-4 h-4 text-[#581c87]" />
             </button>
 
-            {/* Heart Badge (Lavender) */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/40 border border-[#c084fc]/35 shadow-xs">
-              <Heart className="w-3.5 h-3.5 text-[#d8b4fe] fill-[#d8b4fe]" />
-              <span className="text-[11px] font-sans font-medium text-[#f3e8ff] tracking-normal drop-shadow-sm">
+            {/* Heart Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100/70 border border-purple-200/90 shadow-xs">
+              <Heart className="w-3.5 h-3.5 text-[#7e22ce] fill-[#7e22ce]" />
+              <span className="text-[11px] font-sans font-semibold text-[#6b21a8] tracking-normal">
                 With Our Blessings
               </span>
             </div>
 
-            {/* Headline (Glowing Lavender-White) */}
-            <h3 className="font-heading text-xl text-[#f3e8ff] font-semibold tracking-normal leading-snug drop-shadow-[0_2px_8px_rgba(46,8,84,0.8)]">
+            {/* Headline (Deep Royal Purple) */}
+            <h3 className="font-heading text-xl text-[#2e0854] font-semibold tracking-normal leading-snug drop-shadow-xs">
               Thank you for your warm love &amp; blessings
             </h3>
 
-            {/* Emotional Couple Message with Human Typing & Backspace Animation (Lavender) */}
+            {/* Emotional Couple Message with Human Typing & Backspace Animation (Deep Lavender) */}
             <div className="w-full min-h-[96px] flex items-center justify-center px-1">
-              <p className="text-[13px] sm:text-sm font-sans text-[#e9d5ff] font-medium leading-relaxed drop-shadow-[0_1px_4px_rgba(46,8,84,0.8)]">
+              <p className="text-[13px] sm:text-sm font-sans text-[#4c1d95] font-medium leading-relaxed drop-shadow-xs">
                 &ldquo;{typedText}&rdquo;
                 {!isTypingDone && (
-                  <span className="inline-block w-0.5 h-3.5 ml-0.5 align-middle bg-[#d8b4fe] animate-pulse" />
+                  <span className="inline-block w-0.5 h-3.5 ml-0.5 align-middle bg-[#7e22ce] animate-pulse" />
                 )}
               </p>
             </div>
 
-            {/* Couple Signature (Lavender Italics) */}
-            <div className="text-sm font-serif italic text-[#d8b4fe] font-semibold drop-shadow-[0_1px_4px_rgba(46,8,84,0.7)]">
+            {/* Couple Signature (Royal Lavender) */}
+            <div className="text-sm font-serif italic text-[#7e22ce] font-semibold">
               — Suvarna &amp; Rajesh
             </div>
 
-            {/* Timer & Execution Status (10s Countdown in Lavender) */}
+            {/* Timer & Execution Status (10s Countdown) */}
             <div className="w-full pt-1 flex flex-col items-center">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-950/45 border border-[#c084fc]/40 text-xs font-sans font-medium text-[#e9d5ff] shadow-sm drop-shadow-sm">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#d8b4fe] animate-ping" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100/60 border border-purple-200/80 text-xs font-sans font-medium text-[#581c87] shadow-xs">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#7e22ce] animate-ping" />
                 <span>
-                  {pendingAction.actionText} <strong className="text-[#f3e8ff] font-bold text-sm ml-1">{countdown}s</strong>
+                  {pendingAction.actionText} <strong className="text-[#2e0854] font-bold text-sm ml-1">{countdown}s</strong>
                 </span>
               </div>
             </div>

@@ -20,6 +20,8 @@
     background-color: #0b0314;
     color: #2b0b3f;
     font-family: var(--font-sans);
+    overflow-x: clip;
+    touch-action: pan-y;
   }
 }
 

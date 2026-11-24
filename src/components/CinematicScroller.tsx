@@ -144,22 +144,27 @@ export const CinematicScroller: React.FC = () => {
   useEffect(() => {
     if (!isLoaded || !canvasRef.current || !containerRef.current || totalFrames === 0) return;
 
-    // A. Lenis smooth momentum scroller
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-    });
+    // A. Smooth momentum scroller for desktop, 100% native touch for mobile
+    const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    let lenis: Lenis | null = null;
+    let tickerFn: ((time: number) => void) | null = null;
 
-    lenis.on('scroll', ScrollTrigger.update);
+    if (!isTouchDevice) {
+      lenis = new Lenis({
+        duration: 1.0,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        smoothWheel: true,
+      });
 
-    const tickerFn = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(tickerFn);
-    gsap.ticker.lagSmoothing(0);
+      lenis.on('scroll', ScrollTrigger.update);
+
+      tickerFn = (time: number) => {
+        lenis?.raf(time * 1000);
+      };
+      gsap.ticker.add(tickerFn);
+      gsap.ticker.lagSmoothing(0);
+    }
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -316,8 +321,8 @@ export const CinematicScroller: React.FC = () => {
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach((t) => t.kill());
-      gsap.ticker.remove(tickerFn);
-      lenis.destroy();
+      if (tickerFn) gsap.ticker.remove(tickerFn);
+      if (lenis) lenis.destroy();
       window.removeEventListener('resize', resizeCanvas);
     };
   }, [isLoaded, totalFrames]);
@@ -521,7 +526,7 @@ export const CinematicScroller: React.FC = () => {
   };
 
   return (
-    <div className="relative bg-[#0b0314] text-[#2b0b3f] min-h-screen w-full flex justify-center">
+    <div className="relative bg-[#0b0314] text-[#2b0b3f] min-h-screen w-full">
       {/* 
         Luxury Shimmer Loading Overlay
         Featuring Shimmering Names "SUVARNA ❤️ RAJESH" with Radiant Heart Love Icon
@@ -561,12 +566,13 @@ export const CinematicScroller: React.FC = () => {
       */}
       <div
         ref={containerRef}
+        style={{ touchAction: 'pan-y' }}
         className="relative w-full max-w-[440px] h-[100dvh] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
       >
         {/* Full-Screen Video Canvas (Edge-to-Edge) */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-cover block"
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none"
         />
 
         {/* 

@@ -371,3 +371,37 @@
     transform: translateY(-28px) scale(0.9);
   }
 }
+
+.love-flare-rise {
+  animation: loveFlareRise 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loveFlareRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.4) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate3d(calc(var(--flare-x, 0px) * 0.4), -22px, 0) scale(1.2) rotate(var(--flare-rot, 10deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--flare-x, 0px), -110px, 0) scale(0.75) rotate(calc(var(--flare-rot, 10deg) * 1.6));
+  }
+}
+
+.love-ring-flare {
+  animation: loveRingFlare 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loveRingFlare {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+}

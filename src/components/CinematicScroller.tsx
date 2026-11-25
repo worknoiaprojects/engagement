@@ -49,13 +49,6 @@ export const CinematicScroller: React.FC = () => {
   const [isWishesOpen, setIsWishesOpen] = useState(false);
   const [isWishesClosing, setIsWishesClosing] = useState(false);
   const [wishesOrigin, setWishesOrigin] = useState<{ x: number; y: number } | null>(null);
-  const [hasLiked, setHasLiked] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('sr_engagement_liked') === 'true';
-    } catch {
-      return false;
-    }
-  });
   const [likesCount, setLikesCount] = useState<number>(() => {
     try {
       const saved = Number(localStorage.getItem('sr_engagement_likes'));
@@ -93,15 +86,14 @@ export const CinematicScroller: React.FC = () => {
     }, 450);
   };
 
-  const handleToggleLike = () => {
-    const nextLiked = !hasLiked;
-    const nextCount = Math.max(0, likesCount + (nextLiked ? 1 : -1));
-    setHasLiked(nextLiked);
-    setLikesCount(nextCount);
-    try {
-      localStorage.setItem('sr_engagement_liked', String(nextLiked));
-      localStorage.setItem('sr_engagement_likes', String(nextCount));
-    } catch {}
+  const handleSendLove = () => {
+    setLikesCount((prev) => {
+      const nextCount = prev + 1;
+      try {
+        localStorage.setItem('sr_engagement_likes', String(nextCount));
+      } catch {}
+      return nextCount;
+    });
   };
 
   const handleAddWish = (name: string, message: string) => {
@@ -905,7 +897,7 @@ export const CinematicScroller: React.FC = () => {
           >
             <Heart
               className={`w-4 h-4 transition-colors ${
-                hasLiked ? 'text-[#7e22ce] fill-[#7e22ce]' : 'text-[#2e0854]'
+                likesCount > 0 ? 'text-[#e11d48] fill-[#e11d48]' : 'text-[#2e0854]'
               }`}
             />
             <MessageCircle className="w-4 h-4 text-[#2e0854]" />
@@ -923,8 +915,7 @@ export const CinematicScroller: React.FC = () => {
         clickOrigin={wishesOrigin}
         onClose={handleCloseWishes}
         likesCount={likesCount}
-        hasLiked={hasLiked}
-        onToggleLike={handleToggleLike}
+        onSendLove={handleSendLove}
         wishes={wishes}
         onAddWish={handleAddWish}
       />

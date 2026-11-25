@@ -9,17 +9,26 @@ export interface VisitorWish {
   createdAt: string;
 }
 
+interface LoveFlare {
+  id: number;
+  x: number;
+  rot: number;
+  color: string;
+  size: number;
+}
+
 interface WishesModalProps {
   isOpen: boolean;
   isClosing: boolean;
   clickOrigin: { x: number; y: number } | null;
   onClose: () => void;
   likesCount: number;
-  hasLiked: boolean;
-  onToggleLike: () => void;
+  onSendLove: () => void;
   wishes: VisitorWish[];
   onAddWish: (name: string, message: string) => void;
 }
+
+const FLARE_COLORS = ['#ef4444', '#f43f5e', '#ec4899', '#fb7185', '#f97316'];
 
 export const WishesModal: React.FC<WishesModalProps> = ({
   isOpen,
@@ -27,32 +36,54 @@ export const WishesModal: React.FC<WishesModalProps> = ({
   clickOrigin,
   onClose,
   likesCount,
-  hasLiked,
-  onToggleLike,
+  onSendLove,
   wishes,
   onAddWish,
 }) => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [heartBurstKey, setHeartBurstKey] = useState(0);
+  const [flares, setFlares] = useState<LoveFlare[]>([]);
+  const [ringPulse, setRingPulse] = useState(0);
 
   if (!isOpen) return null;
 
   const startX = clickOrigin ? Math.round(clickOrigin.x - window.innerWidth / 2) : 0;
   const startY = clickOrigin ? Math.round(clickOrigin.y - window.innerHeight / 2) : 0;
 
-  const handleLikeClick = () => {
-    onToggleLike();
-    if (!hasLiked) {
-      setHeartBurstKey((k) => k + 1);
-      confetti({
-        particleCount: 24,
-        spread: 55,
-        origin: { y: 0.42 },
-        colors: ['#7e22ce', '#a855f7', '#ec4899', '#f3e8ff'],
-        disableForReducedMotion: true,
-      });
-    }
+  const handleLoveTap = (e: React.MouseEvent<HTMLButtonElement>) => {
+    onSendLove();
+    setRingPulse((p) => p + 1);
+
+    // Spawn multiple rising heart flares per tap for rapid-click feedback
+    const batch: LoveFlare[] = Array.from({ length: 3 }, (_, i) => ({
+      id: Date.now() + Math.random() + i,
+      x: Math.round((Math.random() - 0.5) * 56),
+      rot: Math.round((Math.random() - 0.5) * 44),
+      color: FLARE_COLORS[Math.floor(Math.random() * FLARE_COLORS.length)],
+      size: 12 + Math.floor(Math.random() * 8),
+    }));
+
+    setFlares((prev) => [...prev.slice(-24), ...batch]);
+    setTimeout(() => {
+      const ids = new Set(batch.map((b) => b.id));
+      setFlares((prev) => prev.filter((f) => !ids.has(f.id)));
+    }, 950);
+
+    // Fire crisp mini confetti flares right from the tapped red heart button
+    const rect = e.currentTarget.getBoundingClientRect();
+    confetti({
+      particleCount: 10,
+      spread: 50,
+      startVelocity: 22,
+      ticks: 45,
+      scalar: 0.75,
+      origin: {
+        x: (rect.left + rect.width / 2) / window.innerWidth,
+        y: (rect.top + rect.height / 2) / window.innerHeight,
+      },
+      colors: ['#ef4444', '#f43f5e', '#fb7185', '#fde047'],
+      disableForReducedMotion: true,
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,7 +133,7 @@ export const WishesModal: React.FC<WishesModalProps> = ({
           <X className="w-3.5 h-3.5 text-[#581c87]" />
         </button>
 
-        {/* Header + Interactive Like Animation */}
+        {/* Header */}
         <div className="w-full flex flex-col items-center text-center space-y-2 pt-0.5 shrink-0">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-[0_2px_8px_rgba(46,8,84,0.08)]">
             <MessageCircle className="w-3 h-3 text-[#7e22ce]" />
@@ -114,68 +145,85 @@ export const WishesModal: React.FC<WishesModalProps> = ({
           <h3 className="font-heading text-base text-[#2e0854] font-semibold leading-snug">
             Share Your Love for Suvarna &amp; Rajesh
           </h3>
-
-          {/* Interactive Like Button with Floating Heart Burst */}
-          <button
-            type="button"
-            onClick={handleLikeClick}
-            className={`relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full shadow-[0_3px_12px_rgba(46,8,84,0.1)] transition-all active:scale-95 cursor-pointer ${
-              hasLiked
-                ? 'bg-gradient-to-r from-[#7e22ce] to-[#9333ea] text-white'
-                : 'bg-white text-[#581c87] hover:text-[#2e0854]'
-            }`}
-          >
-            <Heart
-              className={`w-4 h-4 transition-transform duration-300 ${
-                hasLiked ? 'fill-white text-white scale-110' : 'text-[#7e22ce]'
-              }`}
-            />
-            <span className="text-[11px] font-sans font-semibold">
-              {hasLiked ? 'Loved' : 'Send Love'} &middot; {likesCount}
-            </span>
-
-            {heartBurstKey > 0 && (
-              <span
-                key={heartBurstKey}
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 flex gap-1.5"
-              >
-                <Heart className="w-3 h-3 text-[#a855f7] fill-[#a855f7] heart-float-burst" />
-                <Heart className="w-2.5 h-2.5 text-[#ec4899] fill-[#ec4899] heart-float-burst [animation-delay:80ms]" />
-              </span>
-            )}
-          </button>
         </div>
 
-        {/* Scrollable Visitor Comments Feed */}
-        <div className="w-full flex-1 min-h-0 overflow-y-auto my-3 pr-1 space-y-2">
-          {wishes.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4 py-6 rounded-2xl bg-white/55">
-              <Heart className="w-5 h-5 text-[#9333ea]/50 mb-1.5" />
-              <p className="text-[11px] font-sans text-[#4c1d95]/75 leading-relaxed">
-                Be the first to bless Suvarna &amp; Rajesh with your warm wishes.
-              </p>
-            </div>
-          ) : (
-            wishes.map((wish) => (
-              <div
-                key={wish.id}
-                className="w-full text-left p-3 rounded-2xl bg-white/75 shadow-[0_2px_10px_rgba(46,8,84,0.06)] space-y-1"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-sans font-semibold text-[#2e0854] truncate">
-                    {wish.name}
-                  </span>
-                  <span className="text-[9px] font-sans text-[#7e22ce]/70 shrink-0">
-                    {wish.createdAt}
-                  </span>
-                </div>
-                <p className="text-[11.5px] font-sans text-[#4c1d95] leading-relaxed break-words">
-                  {wish.message}
+        {/* Scrollable Visitor Comments Feed + Floating Bottom-Right Red Love Button */}
+        <div className="relative w-full flex-1 min-h-0 my-3">
+          <div className="w-full h-full overflow-y-auto pr-1 pb-12 space-y-2">
+            {wishes.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center px-4 py-6 rounded-2xl bg-white/55">
+                <Heart className="w-5 h-5 text-[#9333ea]/50 mb-1.5" />
+                <p className="text-[11px] font-sans text-[#4c1d95]/75 leading-relaxed">
+                  Be the first to bless Suvarna &amp; Rajesh with your warm wishes.
                 </p>
               </div>
-            ))
-          )}
+            ) : (
+              wishes.map((wish) => (
+                <div
+                  key={wish.id}
+                  className="w-full text-left p-3 rounded-2xl bg-white/75 shadow-[0_2px_10px_rgba(46,8,84,0.06)] space-y-1"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-sans font-semibold text-[#2e0854] truncate">
+                      {wish.name}
+                    </span>
+                    <span className="text-[9px] font-sans text-[#7e22ce]/70 shrink-0">
+                      {wish.createdAt}
+                    </span>
+                  </div>
+                  <p className="text-[11.5px] font-sans text-[#4c1d95] leading-relaxed break-words">
+                    {wish.message}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Floating Red Love Button at Bottom-Right of Comments Box */}
+          <div className="absolute bottom-2.5 right-2.5 z-20 flex flex-col items-center">
+            {/* Rising Heart Flares */}
+            <div className="pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2">
+              {flares.map((flare) => (
+                <Heart
+                  key={flare.id}
+                  style={
+                    {
+                      width: `${flare.size}px`,
+                      height: `${flare.size}px`,
+                      color: flare.color,
+                      fill: flare.color,
+                      '--flare-x': `${flare.x}px`,
+                      '--flare-rot': `${flare.rot}deg`,
+                    } as React.CSSProperties
+                  }
+                  className="absolute -left-2 bottom-0 love-flare-rise drop-shadow-sm"
+                />
+              ))}
+            </div>
+
+            {/* Expanding Radial Flare Ring on Tap */}
+            {ringPulse > 0 && (
+              <span
+                key={ringPulse}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#f43f5e] love-ring-flare"
+              />
+            )}
+
+            <button
+              type="button"
+              onClick={handleLoveTap}
+              title="Tap rapidly to send love!"
+              className="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#ef4444] to-[#e11d48] text-white shadow-[0_6px_20px_rgba(225,29,72,0.45)] hover:shadow-[0_8px_24px_rgba(225,29,72,0.6)] active:scale-90 transition-transform flex items-center justify-center cursor-pointer select-none"
+            >
+              <Heart className="w-5 h-5 fill-white text-white" />
+              {likesCount > 0 && (
+                <span className="absolute -top-2 -right-1.5 min-w-[20px] h-5 px-1.5 rounded-full bg-white text-[#e11d48] text-[10px] font-sans font-bold shadow-[0_2px_8px_rgba(225,29,72,0.28)] flex items-center justify-center">
+                  {likesCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Visitor Comment Form */}

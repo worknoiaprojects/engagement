@@ -1,5 +1,11 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/((?!frames/|images/|audio/|assets/|favicon\\.svg).*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/frames/(.*)",

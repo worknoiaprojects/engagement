@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import confetti from 'canvas-confetti';
-import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
+import { MapPin, Download, Share2, Heart, X, MessageCircle } from 'lucide-react';
+import { WishesModal, type VisitorWish } from './WishesModal';
 
 interface PendingAction {
   type: 'directions' | 'share' | 'download';
@@ -22,6 +23,7 @@ export const CinematicScroller: React.FC = () => {
   const qrHotspotRef = useRef<HTMLButtonElement | null>(null);
   const leftActionsRef = useRef<HTMLDivElement | null>(null);
   const rightActionsRef = useRef<HTMLDivElement | null>(null);
+  const wishesActionRef = useRef<HTMLDivElement | null>(null);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
@@ -42,6 +44,79 @@ export const CinematicScroller: React.FC = () => {
   const [typedText, setTypedText] = useState('');
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
+
+  // Visitor Likes & Wishes Modal State
+  const [isWishesOpen, setIsWishesOpen] = useState(false);
+  const [isWishesClosing, setIsWishesClosing] = useState(false);
+  const [wishesOrigin, setWishesOrigin] = useState<{ x: number; y: number } | null>(null);
+  const [hasLiked, setHasLiked] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('sr_engagement_liked') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [likesCount, setLikesCount] = useState<number>(() => {
+    try {
+      const saved = Number(localStorage.getItem('sr_engagement_likes'));
+      return Number.isFinite(saved) && saved > 0 ? saved : 0;
+    } catch {
+      return 0;
+    }
+  });
+  const [wishes, setWishes] = useState<VisitorWish[]>(() => {
+    try {
+      const raw = localStorage.getItem('sr_engagement_wishes');
+      return raw ? (JSON.parse(raw) as VisitorWish[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleOpenWishes = (event: React.MouseEvent) => {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    setWishesOrigin({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    });
+    setIsWishesClosing(false);
+    setIsWishesOpen(true);
+  };
+
+  const handleCloseWishes = () => {
+    if (isWishesClosing) return;
+    setIsWishesClosing(true);
+    setTimeout(() => {
+      setIsWishesOpen(false);
+      setIsWishesClosing(false);
+      setWishesOrigin(null);
+    }, 450);
+  };
+
+  const handleToggleLike = () => {
+    const nextLiked = !hasLiked;
+    const nextCount = Math.max(0, likesCount + (nextLiked ? 1 : -1));
+    setHasLiked(nextLiked);
+    setLikesCount(nextCount);
+    try {
+      localStorage.setItem('sr_engagement_liked', String(nextLiked));
+      localStorage.setItem('sr_engagement_likes', String(nextCount));
+    } catch {}
+  };
+
+  const handleAddWish = (name: string, message: string) => {
+    const newWish: VisitorWish = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name,
+      message,
+      createdAt: 'Just now',
+    };
+    const next = [newWish, ...wishes];
+    setWishes(next);
+    try {
+      localStorage.setItem('sr_engagement_wishes', JSON.stringify(next));
+    } catch {}
+  };
 
   // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & Aggressive Autoplay
   const unlockAndPlay = () => {
@@ -370,6 +445,21 @@ export const CinematicScroller: React.FC = () => {
         {
           opacity: 1,
           x: 0,
+          pointerEvents: 'auto',
+          ease: 'power2.out',
+          duration: 0.9,
+        },
+        9.2
+      );
+    }
+
+    if (wishesActionRef.current) {
+      tl.fromTo(
+        wishesActionRef.current,
+        { opacity: 0, y: -16, pointerEvents: 'none' },
+        {
+          opacity: 1,
+          y: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
           duration: 0.9,
@@ -801,7 +891,43 @@ export const CinematicScroller: React.FC = () => {
             </div>
           </button>
         </div>
+
+        {/* End-of-Video Floating Glass Button: Like & Visitor Comments */}
+        <div
+          ref={wishesActionRef}
+          className="absolute top-4 right-4 z-30 pointer-events-none opacity-0"
+        >
+          <button
+            type="button"
+            onClick={handleOpenWishes}
+            title="Send Love & Write Wishes"
+            className="apple-liquid-glass px-3.5 py-2 rounded-full flex items-center gap-2 cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95 transition-all shadow-xl pointer-events-auto"
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors ${
+                hasLiked ? 'text-[#7e22ce] fill-[#7e22ce]' : 'text-[#2e0854]'
+              }`}
+            />
+            <MessageCircle className="w-4 h-4 text-[#2e0854]" />
+            <span className="text-[11px] font-sans font-semibold text-[#2e0854]">
+              Wishes{wishes.length + likesCount > 0 ? ` · ${wishes.length + likesCount}` : ''}
+            </span>
+          </button>
+        </div>
       </div>
+
+      {/* Visitor Likes & Wishes Glass Modal */}
+      <WishesModal
+        isOpen={isWishesOpen}
+        isClosing={isWishesClosing}
+        clickOrigin={wishesOrigin}
+        onClose={handleCloseWishes}
+        likesCount={likesCount}
+        hasLiked={hasLiked}
+        onToggleLike={handleToggleLike}
+        wishes={wishes}
+        onAddWish={handleAddWish}
+      />
 
       {/* Heartfelt Clear Liquid Glass Popup Modal (Lavender Typography & Typing Animation) */}
       {pendingAction && (() => {

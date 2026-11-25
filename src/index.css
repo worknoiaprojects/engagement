@@ -352,3 +352,22 @@
     filter: blur(0);
   }
 }
+
+.heart-float-burst {
+  animation: heartFloatBurst 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heartFloatBurst {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.5);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.9);
+  }
+}

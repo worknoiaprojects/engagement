@@ -32,28 +32,24 @@ export const RingPoster: React.FC = () => {
           }}
         />
 
-        {/* Upper Faded Editorial Typography (Bigger, Clean Without Date Line) */}
-        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-7 sm:pt-8 px-4 poster-fade-in">
+        {/* Upper Faded Editorial Typography (Single-Line, Clean Above Hands) */}
+        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-5 sm:pt-6 px-4 poster-fade-in">
           {/* Ghosted Watermark Layer Behind Names */}
           <span
             aria-hidden="true"
-            className="font-script text-6xl sm:text-7xl text-[#4a3226]/[0.08] leading-none select-none -mb-8 tracking-normal"
+            className="font-script text-5xl sm:text-6xl text-[#4a3226]/[0.07] leading-none select-none -mb-6 tracking-normal"
           >
             Forever
           </span>
 
           {/* Spaced Faded Eyebrow */}
-          <p className="font-sans text-[11px] sm:text-xs uppercase tracking-[0.38em] text-[#4a3226]/60 font-medium mb-2.5">
+          <p className="font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.36em] text-[#4a3226]/60 font-medium mb-1.5">
             The Ring Ceremony
           </p>
 
-          {/* Bigger Faded Ink Couple Names */}
-          <h1 className="font-heading text-4xl sm:text-[42px] font-normal tracking-wide text-[#3b251b]/80 leading-none">
-            Suvarna{' '}
-            <span className="font-script text-5xl sm:text-[52px] text-[#6e4b3a]/70 mx-0.5 align-middle">
-              &amp;
-            </span>{' '}
-            Rajesh
+          {/* Single-Line Editorial Serif Couple Names */}
+          <h1 className="font-cormorant italic font-semibold text-[30px] sm:text-[34px] tracking-[0.04em] text-[#3b251b]/78 leading-none whitespace-nowrap">
+            Suvarna <span className="font-normal text-[#6e4b3a]/65 mx-0.5">&amp;</span> Rajesh
           </h1>
         </div>
 

@@ -32,50 +32,56 @@ export const RingPoster: React.FC = () => {
           }}
         />
 
-        {/* Upper Faded Editorial Typography */}
-        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-7 sm:pt-8 px-5 poster-fade-in">
+        {/* Upper Faded Editorial Typography (Bigger, Clean Without Date Line) */}
+        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-7 sm:pt-8 px-4 poster-fade-in">
           {/* Ghosted Watermark Layer Behind Names */}
           <span
             aria-hidden="true"
-            className="font-script text-5xl sm:text-6xl text-[#4a3226]/[0.07] leading-none select-none -mb-7 tracking-normal"
+            className="font-script text-6xl sm:text-7xl text-[#4a3226]/[0.08] leading-none select-none -mb-8 tracking-normal"
           >
             Forever
           </span>
 
           {/* Spaced Faded Eyebrow */}
-          <p className="font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.36em] text-[#4a3226]/55 font-medium mb-2">
+          <p className="font-sans text-[11px] sm:text-xs uppercase tracking-[0.38em] text-[#4a3226]/60 font-medium mb-2.5">
             The Ring Ceremony
           </p>
 
-          {/* Faded Ink Couple Names */}
-          <h1 className="font-heading text-2xl sm:text-3xl font-normal tracking-wide text-[#3b251b]/75 leading-tight">
+          {/* Bigger Faded Ink Couple Names */}
+          <h1 className="font-heading text-4xl sm:text-[42px] font-normal tracking-wide text-[#3b251b]/80 leading-none">
             Suvarna{' '}
-            <span className="font-script text-3xl sm:text-4xl text-[#6e4b3a]/65 mx-1 align-middle">
+            <span className="font-script text-5xl sm:text-[52px] text-[#6e4b3a]/70 mx-0.5 align-middle">
               &amp;
             </span>{' '}
             Rajesh
           </h1>
-
-          {/* Delicate Faded Hairline Divider */}
-          <div className="w-14 h-[1px] bg-gradient-to-r from-transparent via-[#4a3226]/30 to-transparent my-2.5" />
-
-          {/* Faded Date & Venue Subtitle */}
-          <p className="font-cormorant italic text-xs sm:text-sm tracking-[0.14em] text-[#4a3226]/60">
-            26th November &middot; 08:00 AM &middot; Vemulawada
-          </p>
         </div>
 
-        {/* Bottom Faded Poetic Footer */}
+        {/* Bottom Repeated Watermark Pattern ("Suvarna Rajesh Suvarna Rajesh ...") */}
         <div
-          className="absolute inset-x-0 bottom-0 z-10 pb-5 pt-12 px-5 flex flex-col items-center text-center pointer-events-none poster-fade-in"
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-[34%] z-10 overflow-hidden flex flex-col justify-end pb-3 pointer-events-none select-none poster-fade-in"
           style={{
-            background:
-              'linear-gradient(0deg, rgba(244, 238, 230, 0.85) 0%, rgba(244, 238, 230, 0.4) 55%, rgba(244, 238, 230, 0) 100%)',
+            maskImage: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 55%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 55%, transparent 100%)',
           }}
         >
-          <p className="font-cormorant italic text-xs sm:text-[13px] tracking-[0.12em] text-[#3b251b]/55">
-            Two hands, one promise, a lifetime together
-          </p>
+          <div className="flex flex-col gap-1.5 -mx-10 items-center">
+            {[
+              'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
+              'RAJESH · SUVARNA · RAJESH · SUVARNA · RAJESH',
+              'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
+              'RAJESH · SUVARNA · RAJESH · SUVARNA · RAJESH',
+              'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
+            ].map((row, idx) => (
+              <p
+                key={idx}
+                className="font-heading text-[13px] sm:text-sm tracking-[0.28em] whitespace-nowrap text-[#3b251b]/[0.11] font-medium uppercase leading-tight"
+              >
+                {row}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
     </div>

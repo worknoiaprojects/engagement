@@ -150,7 +150,10 @@ export const WishesModal: React.FC<WishesModalProps> = ({
 
         {/* Scrollable Visitor Comments Feed + Floating Bottom-Right Red Love Button */}
         <div className="relative w-full flex-1 min-h-0 my-3">
-          <div className="w-full h-full overflow-y-auto pr-1 pb-12 space-y-2">
+          <div
+            style={{ touchAction: 'pan-y' }}
+            className="w-full h-full overflow-y-auto overscroll-contain pr-1 pb-14 space-y-2"
+          >
             {wishes.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center px-4 py-6 rounded-2xl bg-white/55">
                 <Heart className="w-5 h-5 text-[#9333ea]/50 mb-1.5" />
@@ -162,10 +165,10 @@ export const WishesModal: React.FC<WishesModalProps> = ({
               wishes.map((wish) => (
                 <div
                   key={wish.id}
-                  className="w-full text-left p-3 rounded-2xl bg-white/75 shadow-[0_2px_10px_rgba(46,8,84,0.06)] space-y-1"
+                  className="w-full text-left p-3 rounded-2xl bg-white/75 shadow-[0_2px_10px_rgba(46,8,84,0.06)] space-y-1 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-sans font-semibold text-[#2e0854] truncate">
+                  <div className="flex items-center justify-between gap-2 min-w-0">
+                    <span className="text-[11px] font-sans font-semibold text-[#2e0854] truncate min-w-0">
                       {wish.name}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -178,7 +181,7 @@ export const WishesModal: React.FC<WishesModalProps> = ({
                       </span>
                     </div>
                   </div>
-                  <p className="text-[11.5px] font-sans text-[#4c1d95] leading-relaxed break-words">
+                  <p className="text-[11.5px] font-sans text-[#4c1d95] leading-relaxed [overflow-wrap:anywhere]">
                     {wish.message}
                   </p>
                 </div>

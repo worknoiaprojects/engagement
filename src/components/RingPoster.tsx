@@ -63,7 +63,7 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
       const canvas = document.createElement('canvas');
       canvas.width = POSTER_WIDTH_4K;
       canvas.height = POSTER_HEIGHT_4K;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
       if (!ctx) return;
 
       const W = POSTER_WIDTH_4K;
@@ -111,8 +111,16 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
       ctx.fillStyle = topGrad;
       ctx.fillRect(0, 0, W, H * 0.32);
 
-      // 3. Subtle Radial Vignette
-      const vignette = ctx.createRadialGradient(W * 0.5, H * 0.52, W * 0.35, W * 0.5, H * 0.52, W * 0.78);
+      // 3. Subtle Radial Vignette (Matches CSS farthest-corner 55%-100% so center stays bright)
+      const maxCornerDist = Math.hypot(W * 0.5, H * 0.52);
+      const vignette = ctx.createRadialGradient(
+        W * 0.5,
+        H * 0.52,
+        maxCornerDist * 0.55,
+        W * 0.5,
+        H * 0.52,
+        maxCornerDist
+      );
       vignette.addColorStop(0, 'rgba(42, 26, 18, 0)');
       vignette.addColorStop(1, 'rgba(42, 26, 18, 0.14)');
       ctx.fillStyle = vignette;

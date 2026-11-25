@@ -71,12 +71,12 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
         />
 
         {/* Upper Faded Editorial Typography (Single-Line, Balanced Above Hands) */}
-        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-12 sm:pt-14 px-4 poster-fade-in">
+        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-16 sm:pt-[72px] px-4 poster-fade-in">
           {/* Ghosted Watermark Layer Behind Names */}
           <span
             aria-hidden="true"
             className={`${
-              isTelugu ? 'font-telugu-artistic text-5xl sm:text-6xl -mb-7' : 'font-script text-5xl sm:text-6xl -mb-6'
+              isTelugu ? 'font-telugu-artistic text-5xl sm:text-6xl -mb-3' : 'font-script text-5xl sm:text-6xl -mb-4'
             } text-[#4a3226]/[0.07] leading-none select-none tracking-normal`}
           >
             {copy.watermarkTop}

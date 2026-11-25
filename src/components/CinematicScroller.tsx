@@ -130,9 +130,10 @@ export const CinematicScroller: React.FC = () => {
     }
   }, [isLoaded]);
 
-  // 2. Fetch manifest & preload all lossless frames + final card image
+  // 2. Fetch manifest & preload frames + final card (with safe onload/onerror + timeout so laptops never stall)
   useEffect(() => {
     let isCancelled = false;
+    let safetyTimer: ReturnType<typeof setTimeout> | undefined;
 
     async function loadManifestAndImages() {
       try {
@@ -144,30 +145,51 @@ export const CinematicScroller: React.FC = () => {
 
         setTotalFrames(frameCount);
 
-        let loadedCount = 0;
-        const totalItems = frameCount + 1; // Frames + Final Merged Card
         const images: HTMLImageElement[] = new Array(frameCount);
+        imagesRef.current = images;
 
-        const checkProgress = () => {
-          if (isCancelled) return;
-          loadedCount++;
-          if (loadedCount >= totalItems) {
-            imagesRef.current = images;
-            setIsLoaded(true);
+        let hasEntered = false;
+        const finishLoading = () => {
+          if (isCancelled || hasEntered) return;
+          hasEntered = true;
+          if (safetyTimer) clearTimeout(safetyTimer);
+          imagesRef.current = images;
+          setIsLoaded(true);
+        };
+
+        // Safety fallback: never stay stuck on loading screen past 4.5s
+        safetyTimer = setTimeout(finishLoading, 4500);
+
+        const initialBatchTarget = Math.min(frameCount, 24);
+        let initialReadyCount = 0;
+        let cardReady = false;
+
+        const maybeEnter = () => {
+          if (initialReadyCount >= initialBatchTarget && cardReady) {
+            finishLoading();
           }
         };
 
-        // Preload video frames
+        // Preload video frames reliably via onload/onerror (avoids Chromium 190x concurrent decode() hangs)
         for (let i = 1; i <= frameCount; i++) {
           if (isCancelled) return;
           const img = new Image();
+          let settled = false;
+          const onSettle = () => {
+            if (settled || isCancelled) return;
+            settled = true;
+            if (i <= initialBatchTarget) {
+              initialReadyCount++;
+              maybeEnter();
+            }
+          };
+
+          img.onload = onSettle;
+          img.onerror = onSettle;
           img.src = getFramePath(i);
 
-          if (typeof img.decode === 'function') {
-            img.decode().then(checkProgress).catch(checkProgress);
-          } else {
-            img.onload = checkProgress;
-            img.onerror = checkProgress;
+          if (img.complete) {
+            onSettle();
           }
 
           images[i - 1] = img;
@@ -175,12 +197,18 @@ export const CinematicScroller: React.FC = () => {
 
         // Preload final high-resolution merged card
         const cardImg = new Image();
+        let cardSettled = false;
+        const onCardSettle = () => {
+          if (cardSettled || isCancelled) return;
+          cardSettled = true;
+          cardReady = true;
+          maybeEnter();
+        };
+        cardImg.onload = onCardSettle;
+        cardImg.onerror = onCardSettle;
         cardImg.src = '/images/final_card_1080.webp';
-        if (typeof cardImg.decode === 'function') {
-          cardImg.decode().then(checkProgress).catch(checkProgress);
-        } else {
-          cardImg.onload = checkProgress;
-          cardImg.onerror = checkProgress;
+        if (cardImg.complete) {
+          onCardSettle();
         }
       } catch (e) {
         console.warn("Waiting for invitation assets...", e);
@@ -191,6 +219,7 @@ export const CinematicScroller: React.FC = () => {
 
     return () => {
       isCancelled = true;
+      if (safetyTimer) clearTimeout(safetyTimer);
     };
   }, []);
 

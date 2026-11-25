@@ -29,7 +29,103 @@ interface WishesModalProps {
   onAddWish: (name: string, message: string) => void;
 }
 
-const FLARE_COLORS = ['#ef4444', '#f43f5e', '#ec4899', '#fb7185', '#f97316'];
+const FLARE_COLORS = ['#ef4444', '#f43f5e', '#ec4899', '#fb7185', '#facc15', '#a855f7'];
+
+function launchButtonConfetti(rect: DOMRect | undefined, isGrand: boolean) {
+  const origin = rect
+    ? {
+        x: (rect.left + rect.width / 2) / window.innerWidth,
+        y: (rect.top + rect.height / 2) / window.innerHeight,
+      }
+    : { x: 0.78, y: 0.72 };
+
+  if (isGrand) {
+    confetti({
+      particleCount: 55,
+      spread: 100,
+      startVelocity: 40,
+      ticks: 80,
+      origin,
+      colors: ['#facc15', '#9333ea', '#ec4899', '#d8b4fe', '#ffffff'],
+      disableForReducedMotion: true,
+    });
+    setTimeout(() => {
+      confetti({
+        particleCount: 30,
+        angle: 118,
+        spread: 55,
+        startVelocity: 36,
+        ticks: 75,
+        shapes: ['star', 'circle'],
+        origin,
+        colors: ['#fde047', '#a855f7', '#fb7185'],
+        disableForReducedMotion: true,
+      });
+      confetti({
+        particleCount: 30,
+        angle: 68,
+        spread: 55,
+        startVelocity: 36,
+        ticks: 75,
+        shapes: ['star', 'circle'],
+        origin,
+        colors: ['#facc15', '#c084fc', '#f43f5e'],
+        disableForReducedMotion: true,
+      });
+    }, 140);
+    setTimeout(() => {
+      confetti({
+        particleCount: 36,
+        spread: 85,
+        startVelocity: 45,
+        scalar: 1.05,
+        ticks: 85,
+        shapes: ['star'],
+        origin,
+        colors: ['#facc15', '#fef08a', '#e9d5ff', '#ec4899'],
+        disableForReducedMotion: true,
+      });
+    }, 320);
+    setTimeout(() => {
+      confetti({
+        particleCount: 26,
+        spread: 110,
+        startVelocity: 24,
+        gravity: 0.6,
+        ticks: 90,
+        origin,
+        colors: ['#d8b4fe', '#fbcfe8', '#fef08a', '#a855f7'],
+        disableForReducedMotion: true,
+      });
+    }, 520);
+    return;
+  }
+
+  confetti({
+    particleCount: 22,
+    spread: 75,
+    startVelocity: 30,
+    ticks: 60,
+    scalar: 0.85,
+    origin,
+    colors: ['#ef4444', '#f43f5e', '#fb7185', '#facc15', '#ffffff'],
+    disableForReducedMotion: true,
+  });
+  setTimeout(() => {
+    confetti({
+      particleCount: 14,
+      angle: 105,
+      spread: 55,
+      startVelocity: 28,
+      ticks: 55,
+      scalar: 0.8,
+      shapes: ['star', 'circle'],
+      origin,
+      colors: ['#fde047', '#ec4899', '#fb7185'],
+      disableForReducedMotion: true,
+    });
+  }, 110);
+}
 
 export const WishesModal: React.FC<WishesModalProps> = ({
   isOpen,
@@ -58,36 +154,22 @@ export const WishesModal: React.FC<WishesModalProps> = ({
     onSendLove();
     setRingPulse((p) => p + 1);
 
-    // Spawn multiple rising heart flares per tap for rapid-click feedback
-    const batch: LoveFlare[] = Array.from({ length: 3 }, (_, i) => ({
+    // Spawn 6 rising heart/sparkle/star flares per tap for rapid-click fireworks
+    const batch: LoveFlare[] = Array.from({ length: 6 }, (_, i) => ({
       id: Date.now() + Math.random() + i,
-      x: Math.round((Math.random() - 0.5) * 56),
-      rot: Math.round((Math.random() - 0.5) * 44),
+      x: Math.round((Math.random() - 0.5) * 96),
+      rot: Math.round((Math.random() - 0.5) * 70),
       color: FLARE_COLORS[Math.floor(Math.random() * FLARE_COLORS.length)],
-      size: 12 + Math.floor(Math.random() * 8),
+      size: 12 + Math.floor(Math.random() * 9),
     }));
 
-    setFlares((prev) => [...prev.slice(-24), ...batch]);
+    setFlares((prev) => [...prev.slice(-30), ...batch]);
     setTimeout(() => {
       const ids = new Set(batch.map((b) => b.id));
       setFlares((prev) => prev.filter((f) => !ids.has(f.id)));
-    }, 950);
+    }, 1050);
 
-    // Fire crisp mini confetti flares right from the tapped red heart button
-    const rect = e.currentTarget.getBoundingClientRect();
-    confetti({
-      particleCount: 10,
-      spread: 50,
-      startVelocity: 22,
-      ticks: 45,
-      scalar: 0.75,
-      origin: {
-        x: (rect.left + rect.width / 2) / window.innerWidth,
-        y: (rect.top + rect.height / 2) / window.innerHeight,
-      },
-      colors: ['#ef4444', '#f43f5e', '#fb7185', '#fde047'],
-      disableForReducedMotion: true,
-    });
+    launchButtonConfetti(e.currentTarget.getBoundingClientRect(), false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,80 +198,7 @@ export const WishesModal: React.FC<WishesModalProps> = ({
       setCommentSparks((prev) => prev.filter((s) => !ids.has(s.id)));
     }, 1200);
 
-    // Launch 4-wave fireworks celebration confetti directly from the comment button's coordinates
-    const rect = sendBtnRef.current?.getBoundingClientRect();
-    const origin = rect
-      ? {
-          x: (rect.left + rect.width / 2) / window.innerWidth,
-          y: (rect.top + rect.height / 2) / window.innerHeight,
-        }
-      : { x: 0.78, y: 0.78 };
-
-    // Wave 1: Main starburst
-    confetti({
-      particleCount: 55,
-      spread: 100,
-      startVelocity: 40,
-      ticks: 80,
-      origin,
-      colors: ['#facc15', '#9333ea', '#ec4899', '#d8b4fe', '#ffffff'],
-      disableForReducedMotion: true,
-    });
-
-    // Wave 2: Twin angled cannons
-    setTimeout(() => {
-      confetti({
-        particleCount: 30,
-        angle: 118,
-        spread: 55,
-        startVelocity: 36,
-        ticks: 75,
-        shapes: ['star', 'circle'],
-        origin,
-        colors: ['#fde047', '#a855f7', '#fb7185'],
-        disableForReducedMotion: true,
-      });
-      confetti({
-        particleCount: 30,
-        angle: 68,
-        spread: 55,
-        startVelocity: 36,
-        ticks: 75,
-        shapes: ['star', 'circle'],
-        origin,
-        colors: ['#facc15', '#c084fc', '#f43f5e'],
-        disableForReducedMotion: true,
-      });
-    }, 140);
-
-    // Wave 3: High-arcing golden shimmer shower
-    setTimeout(() => {
-      confetti({
-        particleCount: 36,
-        spread: 85,
-        startVelocity: 45,
-        scalar: 1.05,
-        ticks: 85,
-        shapes: ['star'],
-        origin,
-        colors: ['#facc15', '#fef08a', '#e9d5ff', '#ec4899'],
-        disableForReducedMotion: true,
-      });
-    }, 320);
-
-    // Wave 4: Floating petal afterglow
-    setTimeout(() => {
-      confetti({
-        particleCount: 26,
-        spread: 110,
-        startVelocity: 24,
-        gravity: 0.6,
-        ticks: 90,
-        origin,
-        colors: ['#d8b4fe', '#fbcfe8', '#fef08a', '#a855f7'],
-        disableForReducedMotion: true,
-      });
-    }, 520);
+    launchButtonConfetti(sendBtnRef.current?.getBoundingClientRect(), true);
   };
 
   return (
@@ -278,40 +287,70 @@ export const WishesModal: React.FC<WishesModalProps> = ({
 
           {/* Floating Red Love Button at Bottom-Right of Comments Box */}
           <div className="absolute bottom-2.5 right-2.5 z-20 flex flex-col items-center">
-            {/* Rising Heart Flares */}
+            {/* Rising Heart, Sparkle & Star Flares */}
             <div className="pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2">
-              {flares.map((flare) => (
-                <Heart
+              {flares.map((flare, idx) => (
+                <span
                   key={flare.id}
                   style={
                     {
-                      width: `${flare.size}px`,
-                      height: `${flare.size}px`,
-                      color: flare.color,
-                      fill: flare.color,
                       '--flare-x': `${flare.x}px`,
                       '--flare-rot': `${flare.rot}deg`,
                     } as React.CSSProperties
                   }
                   className="absolute -left-2 bottom-0 love-flare-rise drop-shadow-sm"
-                />
+                >
+                  {idx % 4 === 0 ? (
+                    <Sparkles style={{ width: `${flare.size}px`, height: `${flare.size}px`, color: flare.color }} />
+                  ) : idx % 4 === 1 ? (
+                    <Star
+                      style={{
+                        width: `${flare.size}px`,
+                        height: `${flare.size}px`,
+                        color: flare.color,
+                        fill: flare.color,
+                      }}
+                    />
+                  ) : (
+                    <Heart
+                      style={{
+                        width: `${flare.size}px`,
+                        height: `${flare.size}px`,
+                        color: flare.color,
+                        fill: flare.color,
+                      }}
+                    />
+                  )}
+                </span>
               ))}
             </div>
 
-            {/* Expanding Radial Flare Ring on Tap */}
+            {/* Triple Staggered Crimson-Gold Flare Rings on Tap */}
             {ringPulse > 0 && (
-              <span
-                key={ringPulse}
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#f43f5e] love-ring-flare"
-              />
+              <React.Fragment key={ringPulse}>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#f43f5e] love-ring-flare"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#facc15] love-ring-flare [animation-delay:90ms]"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#ec4899] love-ring-flare [animation-delay:180ms]"
+                />
+              </React.Fragment>
             )}
 
             <button
+              key={`love-btn-${ringPulse}`}
               type="button"
               onClick={handleLoveTap}
               title="Tap rapidly to send love!"
-              className="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#ef4444] to-[#e11d48] text-white shadow-[0_6px_20px_rgba(225,29,72,0.45)] hover:shadow-[0_8px_24px_rgba(225,29,72,0.6)] active:scale-90 transition-transform flex items-center justify-center cursor-pointer select-none"
+              className={`comment-btn-sheen relative w-11 h-11 rounded-full bg-gradient-to-br from-[#ef4444] via-[#e11d48] to-[#ec4899] text-white shadow-[0_6px_20px_rgba(225,29,72,0.45)] hover:shadow-[0_8px_24px_rgba(225,29,72,0.6)] active:scale-90 transition-transform flex items-center justify-center cursor-pointer select-none ${
+                ringPulse > 0 ? 'comment-btn-celebrate' : ''
+              }`}
             >
               <Heart className="w-5 h-5 fill-white text-white" />
               {likesCount > 0 && (

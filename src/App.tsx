@@ -2,16 +2,25 @@ import { CinematicScroller } from './components/CinematicScroller';
 import { RingPoster } from './components/RingPoster';
 
 const POSTER_ROUTES = new Set(['/poster', '/rings', '/ring-ceremony']);
+const TELUGU_POSTER_ROUTES = new Set(['/telugu', '/poster-te', '/rings-te']);
 
 export default function App() {
   const pathname = typeof window !== 'undefined'
-    ? window.location.pathname.replace(/\/+$/, '') || '/'
+    ? (window.location.pathname.replace(/\/+$/, '') || '/').toLowerCase()
     : '/';
 
-  if (POSTER_ROUTES.has(pathname.toLowerCase())) {
+  if (TELUGU_POSTER_ROUTES.has(pathname)) {
     return (
       <main className="bg-[#0b0314] h-[100dvh] overflow-hidden text-[#3b251b]">
-        <RingPoster />
+        <RingPoster language="te" />
+      </main>
+    );
+  }
+
+  if (POSTER_ROUTES.has(pathname)) {
+    return (
+      <main className="bg-[#0b0314] h-[100dvh] overflow-hidden text-[#3b251b]">
+        <RingPoster language="en" />
       </main>
     );
   }

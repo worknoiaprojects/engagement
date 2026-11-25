@@ -1,6 +1,44 @@
 import React from 'react';
 
-export const RingPoster: React.FC = () => {
+interface RingPosterProps {
+  language?: 'en' | 'te';
+}
+
+const POSTER_CONTENT = {
+  en: {
+    alt: 'The Ring Ceremony - Suvarna & Rajesh',
+    watermarkTop: 'Forever',
+    eyebrow: 'The Ring Ceremony',
+    bride: 'Suvarna',
+    groom: 'Rajesh',
+    rows: [
+      'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
+      'RAJESH · SUVARNA · RAJESH · SUVARNA · RAJESH',
+      'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
+      'RAJESH · SUVARNA · RAJESH · SUVARNA · RAJESH',
+      'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
+    ],
+  },
+  te: {
+    alt: 'ఉంగరాల వేడుక - సువర్ణ & రాజేష్',
+    watermarkTop: 'శుభం',
+    eyebrow: 'ఉంగరాల వేడుక',
+    bride: 'సువర్ణ',
+    groom: 'రాజేష్',
+    rows: [
+      'సువర్ణ · రాజేష్ · సువర్ణ · రాజేష్ · సువర్ణ',
+      'రాజేష్ · సువర్ణ · రాజేష్ · సువర్ణ · రాజేష్',
+      'సువర్ణ · రాజేష్ · సువర్ణ · రాజేష్ · సువర్ణ',
+      'రాజేష్ · సువర్ణ · రాజేష్ · సువర్ణ · రాజేష్',
+      'సువర్ణ · రాజేష్ · సువర్ణ · రాజేష్ · సువర్ణ',
+    ],
+  },
+} as const;
+
+export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
+  const isTelugu = language === 'te';
+  const copy = POSTER_CONTENT[language];
+
   return (
     <div className="relative bg-[#0b0314] h-[100dvh] w-full overflow-hidden flex items-center justify-center p-5">
       {/* Small Centered 4:5 Editorial Poster (Matches Exact 736x920 Proportions, Not Full Screen) */}
@@ -8,7 +46,7 @@ export const RingPoster: React.FC = () => {
         {/* Backlit Ring Ceremony Silhouette Artwork (Exact 4:5 Natural Proportions) */}
         <img
           src="/images/ring_ceremony.jpg"
-          alt="The Ring Ceremony - Suvarna & Rajesh"
+          alt={copy.alt}
           decoding="sync"
           loading="eager"
           className="w-full h-full object-cover object-center pointer-events-none select-none block"
@@ -37,23 +75,37 @@ export const RingPoster: React.FC = () => {
           {/* Ghosted Watermark Layer Behind Names */}
           <span
             aria-hidden="true"
-            className="font-script text-5xl sm:text-6xl text-[#4a3226]/[0.07] leading-none select-none -mb-6 tracking-normal"
+            className={`${
+              isTelugu ? 'font-telugu-artistic text-5xl sm:text-6xl -mb-7' : 'font-script text-5xl sm:text-6xl -mb-6'
+            } text-[#4a3226]/[0.07] leading-none select-none tracking-normal`}
           >
-            Forever
+            {copy.watermarkTop}
           </span>
 
           {/* Spaced Faded Eyebrow */}
-          <p className="font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.36em] text-[#4a3226]/60 font-medium mb-1.5">
-            The Ring Ceremony
+          <p
+            className={`${
+              isTelugu
+                ? 'font-telugu-serif text-xs sm:text-[13px] tracking-[0.14em]'
+                : 'font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.36em]'
+            } text-[#4a3226]/60 font-medium mb-1.5`}
+          >
+            {copy.eyebrow}
           </p>
 
-          {/* Single-Line Editorial Serif Couple Names */}
-          <h1 className="font-cormorant italic font-semibold text-[30px] sm:text-[34px] tracking-[0.04em] text-[#3b251b]/78 leading-none whitespace-nowrap">
-            Suvarna <span className="font-normal text-[#6e4b3a]/65 mx-0.5">&amp;</span> Rajesh
+          {/* Single-Line Editorial Couple Names */}
+          <h1
+            className={`${
+              isTelugu
+                ? 'font-telugu-serif font-semibold text-[28px] sm:text-[32px] tracking-wide'
+                : 'font-cormorant italic font-semibold text-[30px] sm:text-[34px] tracking-[0.04em]'
+            } text-[#3b251b]/78 leading-none whitespace-nowrap`}
+          >
+            {copy.bride} <span className="font-normal text-[#6e4b3a]/65 mx-0.5">&amp;</span> {copy.groom}
           </h1>
         </div>
 
-        {/* Bottom Repeated Watermark Pattern ("Suvarna Rajesh Suvarna Rajesh ...") */}
+        {/* Bottom Repeated Watermark Pattern */}
         <div
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-[34%] z-10 overflow-hidden flex flex-col justify-end pb-3 pointer-events-none select-none poster-fade-in"
@@ -63,16 +115,14 @@ export const RingPoster: React.FC = () => {
           }}
         >
           <div className="flex flex-col gap-1.5 -mx-10 items-center">
-            {[
-              'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
-              'RAJESH · SUVARNA · RAJESH · SUVARNA · RAJESH',
-              'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
-              'RAJESH · SUVARNA · RAJESH · SUVARNA · RAJESH',
-              'SUVARNA · RAJESH · SUVARNA · RAJESH · SUVARNA',
-            ].map((row, idx) => (
+            {copy.rows.map((row, idx) => (
               <p
                 key={idx}
-                className="font-heading text-[13px] sm:text-sm tracking-[0.28em] whitespace-nowrap text-[#3b251b]/[0.11] font-medium uppercase leading-tight"
+                className={`${
+                  isTelugu
+                    ? 'font-telugu-serif text-[13px] sm:text-sm tracking-[0.18em]'
+                    : 'font-heading text-[13px] sm:text-sm tracking-[0.28em] uppercase'
+                } whitespace-nowrap text-[#3b251b]/[0.11] font-medium leading-tight`}
               >
                 {row}
               </p>

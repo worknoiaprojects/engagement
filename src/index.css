@@ -16,12 +16,14 @@
     --font-telugu-clean: 'Mandali', 'NATS', sans-serif;
   }
 
-  body {
+  html, body {
     background-color: #0b0314;
     color: #2b0b3f;
     font-family: var(--font-sans);
-    overflow-x: clip;
-    touch-action: pan-y;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 }
 

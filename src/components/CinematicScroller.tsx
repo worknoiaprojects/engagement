@@ -258,6 +258,8 @@ export const CinematicScroller: React.FC = () => {
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', resizeCanvas);
+    window.visualViewport?.addEventListener('resize', resizeCanvas);
 
     // Initial first-frame render (sealed envelope)
     render(0);
@@ -377,6 +379,8 @@ export const CinematicScroller: React.FC = () => {
       });
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('orientationchange', resizeCanvas);
+      window.visualViewport?.removeEventListener('resize', resizeCanvas);
     };
   }, [isLoaded, totalFrames]);
 

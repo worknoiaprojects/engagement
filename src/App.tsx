@@ -1,6 +1,8 @@
 import { CinematicScroller } from './components/CinematicScroller';
 import { RingPoster } from './components/RingPoster';
+import { NotFound } from './components/NotFound';
 
+const HOME_ROUTES = new Set(['/', '/index.html']);
 const POSTER_ROUTES = new Set(['/poster', '/rings', '/ring-ceremony']);
 const TELUGU_POSTER_ROUTES = new Set(['/telugu', '/poster-te', '/rings-te']);
 
@@ -25,13 +27,21 @@ export default function App() {
     );
   }
 
+  if (HOME_ROUTES.has(pathname)) {
+    return (
+      <main className="bg-[#0b0314] h-[100dvh] overflow-hidden text-[#2b0b3f]">
+        {/* 
+          Cinematic Wedding Reveal
+          Centered on desktop (max-w-[440px]), 100% full-width stationary viewport on mobile.
+        */}
+        <CinematicScroller />
+      </main>
+    );
+  }
+
   return (
     <main className="bg-[#0b0314] h-[100dvh] overflow-hidden text-[#2b0b3f]">
-      {/* 
-        Cinematic Wedding Reveal
-        Centered on desktop (max-w-[440px]), 100% full-width stationary viewport on mobile.
-      */}
-      <CinematicScroller />
+      <NotFound />
     </main>
   );
 }

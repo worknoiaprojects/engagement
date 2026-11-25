@@ -32,8 +32,8 @@ export const RingPoster: React.FC = () => {
           }}
         />
 
-        {/* Upper Faded Editorial Typography (Single-Line, Clean Above Hands) */}
-        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-5 sm:pt-6 px-4 poster-fade-in">
+        {/* Upper Faded Editorial Typography (Single-Line, Balanced Above Hands) */}
+        <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center text-center pt-12 sm:pt-14 px-4 poster-fade-in">
           {/* Ghosted Watermark Layer Behind Names */}
           <span
             aria-hidden="true"

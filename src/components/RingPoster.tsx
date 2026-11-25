@@ -73,6 +73,26 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
+      // Clip to exact rounded-2xl corner radius (16px scaled to 4K) with transparent outer corners
+      const cornerRadius = Math.round(16 * s);
+      ctx.save();
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(0, 0, W, H, cornerRadius);
+      } else {
+        ctx.moveTo(cornerRadius, 0);
+        ctx.lineTo(W - cornerRadius, 0);
+        ctx.quadraticCurveTo(W, 0, W, cornerRadius);
+        ctx.lineTo(W, H - cornerRadius);
+        ctx.quadraticCurveTo(W, H, W - cornerRadius, H);
+        ctx.lineTo(cornerRadius, H);
+        ctx.quadraticCurveTo(0, H, 0, H - cornerRadius);
+        ctx.lineTo(0, cornerRadius);
+        ctx.quadraticCurveTo(0, 0, cornerRadius, 0);
+      }
+      ctx.closePath();
+      ctx.clip();
+
       // 1. Base Backlit Ring Ceremony Artwork
       ctx.drawImage(img, 0, 0, W, H);
 
@@ -184,6 +204,8 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
 
         ctx.drawImage(wmCanvas, 0, H - wmCanvas.height);
       }
+
+      ctx.restore();
 
       // 6. Export Lossless 4K PNG
       const blob = await new Promise<Blob | null>((resolve) =>

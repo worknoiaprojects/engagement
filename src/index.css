@@ -14,6 +14,8 @@
     --font-telugu-poetry: 'Suranna', 'Tenali Ramakrishna', serif;
     --font-telugu-artistic: 'Gidugu', cursive;
     --font-telugu-clean: 'Mandali', 'NATS', sans-serif;
+    --font-telugu-krushna: 'Sree Krushnadevaraya', 'Noto Serif Telugu', serif;
+    --font-telugu-tiro: 'Tiro Telugu', 'Suranna', serif;
   }
 
   html, body {
@@ -177,6 +179,16 @@
 .font-telugu-clean {
   font-family: var(--font-telugu-clean);
   line-height: 1.5;
+}
+
+.font-telugu-krushna {
+  font-family: var(--font-telugu-krushna);
+  line-height: 1.35;
+}
+
+.font-telugu-tiro {
+  font-family: var(--font-telugu-tiro);
+  line-height: 1.45;
 }
 
 /* ----------------------------------------------------

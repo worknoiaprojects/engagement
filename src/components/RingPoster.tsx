@@ -20,9 +20,9 @@ const POSTER_CONTENT = {
     ],
   },
   te: {
-    alt: 'ఉంగరాల వేడుక - సువర్ణ & రాజేష్',
+    alt: 'నిశ్చితార్థం - సువర్ణ & రాజేష్',
     watermarkTop: 'శుభం',
-    eyebrow: 'ఉంగరాల వేడుక',
+    eyebrow: 'నిశ్చితార్థం',
     bride: 'సువర్ణ',
     groom: 'రాజేష్',
     rows: [
@@ -86,9 +86,9 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
           <p
             className={`${
               isTelugu
-                ? 'font-telugu-serif text-xs sm:text-[13px] tracking-[0.14em]'
+                ? 'font-telugu-tiro text-sm sm:text-[15px] tracking-[0.18em]'
                 : 'font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.36em]'
-            } text-[#4a3226]/60 font-medium mb-1.5`}
+            } text-[#4a3226]/62 font-medium mb-1.5`}
           >
             {copy.eyebrow}
           </p>
@@ -97,7 +97,7 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
           <h1
             className={`${
               isTelugu
-                ? 'font-telugu-serif font-semibold text-[28px] sm:text-[32px] tracking-wide'
+                ? 'font-telugu-krushna font-normal text-[32px] sm:text-[36px] tracking-wide'
                 : 'font-cormorant italic font-semibold text-[30px] sm:text-[34px] tracking-[0.04em]'
             } text-[#3b251b]/78 leading-none whitespace-nowrap`}
           >
@@ -120,7 +120,7 @@ export const RingPoster: React.FC<RingPosterProps> = ({ language = 'en' }) => {
                 key={idx}
                 className={`${
                   isTelugu
-                    ? 'font-telugu-serif text-[13px] sm:text-sm tracking-[0.18em]'
+                    ? 'font-telugu-clean text-[13px] sm:text-sm tracking-[0.18em]'
                     : 'font-heading text-[13px] sm:text-sm tracking-[0.28em] uppercase'
                 } whitespace-nowrap text-[#3b251b]/[0.11] font-medium leading-tight`}
               >

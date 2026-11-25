@@ -884,26 +884,30 @@ export const CinematicScroller: React.FC = () => {
           </button>
         </div>
 
-        {/* End-of-Video Floating Glass Button: Like & Visitor Comments (Bottom-Right) */}
+        {/* End-of-Video Floating Circular Glass Button: Wobbles to Grab Attention */}
         <div
           ref={wishesActionRef}
-          className="absolute bottom-[10%] right-6 z-30 pointer-events-none opacity-0"
+          className="absolute bottom-[9%] right-6 z-30 pointer-events-none opacity-0"
         >
           <button
             type="button"
             onClick={handleOpenWishes}
             title="Send Love & Write Wishes"
-            className="apple-liquid-glass px-3.5 py-2 rounded-full flex items-center gap-2 cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-95 transition-all shadow-xl pointer-events-auto"
+            className="apple-liquid-glass glass-wobble-attention relative w-12 h-12 sm:w-[52px] sm:h-[52px] rounded-full flex items-center justify-center cursor-pointer text-[#2e0854] hover:text-[#7e22ce] active:scale-90 transition-colors shadow-xl pointer-events-auto"
           >
-            <Heart
-              className={`w-4 h-4 transition-colors ${
-                likesCount > 0 ? 'text-[#e11d48] fill-[#e11d48]' : 'text-[#2e0854]'
-              }`}
-            />
-            <MessageCircle className="w-4 h-4 text-[#2e0854]" />
-            <span className="text-[11px] font-sans font-semibold text-[#2e0854]">
-              Wishes{wishes.length + likesCount > 0 ? ` · ${wishes.length + likesCount}` : ''}
-            </span>
+            <div className="relative flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-[#2e0854]" />
+              <Heart
+                className={`w-2.5 h-2.5 absolute -top-1 -right-1.5 transition-colors ${
+                  likesCount > 0 ? 'text-[#e11d48] fill-[#e11d48]' : 'text-[#7e22ce] fill-[#7e22ce]'
+                }`}
+              />
+            </div>
+            {wishes.length + likesCount > 0 && (
+              <span className="absolute -top-1.5 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-[#581c87] text-[9px] font-sans font-bold shadow-[0_2px_6px_rgba(46,8,84,0.2)] flex items-center justify-center">
+                {wishes.length + likesCount}
+              </span>
+            )}
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ export interface VisitorWish {
   id: string;
   name: string;
   message: string;
+  loveCount?: number;
   createdAt: string;
 }
 

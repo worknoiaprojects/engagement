@@ -2,6 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import confetti from 'canvas-confetti';
 import { MapPin, Download, Share2, Heart, X, MessageCircle } from 'lucide-react';
+import {
+  addDoc,
+  collection,
+  doc,
+  increment,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { WishesModal, type VisitorWish } from './WishesModal';
 
 interface PendingAction {
@@ -45,26 +56,58 @@ export const CinematicScroller: React.FC = () => {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
 
-  // Visitor Likes & Wishes Modal State
+  // Visitor Likes & Wishes Modal State (Synced Live with Firebase Firestore)
   const [isWishesOpen, setIsWishesOpen] = useState(false);
   const [isWishesClosing, setIsWishesClosing] = useState(false);
   const [wishesOrigin, setWishesOrigin] = useState<{ x: number; y: number } | null>(null);
-  const [likesCount, setLikesCount] = useState<number>(() => {
-    try {
-      const saved = Number(localStorage.getItem('sr_engagement_likes'));
-      return Number.isFinite(saved) && saved > 0 ? saved : 0;
-    } catch {
-      return 0;
-    }
-  });
-  const [wishes, setWishes] = useState<VisitorWish[]>(() => {
-    try {
-      const raw = localStorage.getItem('sr_engagement_wishes');
-      return raw ? (JSON.parse(raw) as VisitorWish[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [likesCount, setLikesCount] = useState<number>(0);
+  const [sessionLoveCount, setSessionLoveCount] = useState<number>(0);
+  const [wishes, setWishes] = useState<VisitorWish[]>([]);
+
+  useEffect(() => {
+    const wishesQuery = query(collection(db, 'wishes'), orderBy('createdAtMs', 'desc'));
+    const unsubWishes = onSnapshot(
+      wishesQuery,
+      (snapshot) => {
+        const items: VisitorWish[] = snapshot.docs.map((d) => {
+          const data = d.data();
+          const ts = typeof data.createdAtMs === 'number' ? data.createdAtMs : null;
+          return {
+            id: d.id,
+            name: String(data.name || 'Guest'),
+            message: String(data.message || ''),
+            loveCount: Number(data.loveCount || 0),
+            createdAt: ts
+              ? new Date(ts).toLocaleString([], {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : 'Just now',
+          };
+        });
+        setWishes(items);
+      },
+      (err) => console.warn('Wishes listener:', err)
+    );
+
+    const statsRef = doc(db, 'stats', 'engagement');
+    const unsubStats = onSnapshot(
+      statsRef,
+      (snap) => {
+        if (snap.exists()) {
+          setLikesCount(Number(snap.data()?.totalLikes || 0));
+        }
+      },
+      (err) => console.warn('Likes listener:', err)
+    );
+
+    return () => {
+      unsubWishes();
+      unsubStats();
+    };
+  }, []);
 
   const handleOpenWishes = (event: React.MouseEvent) => {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -87,27 +130,26 @@ export const CinematicScroller: React.FC = () => {
   };
 
   const handleSendLove = () => {
-    setLikesCount((prev) => {
-      const nextCount = prev + 1;
-      try {
-        localStorage.setItem('sr_engagement_likes', String(nextCount));
-      } catch {}
-      return nextCount;
-    });
+    setLikesCount((prev) => prev + 1);
+    setSessionLoveCount((prev) => prev + 1);
+    setDoc(
+      doc(db, 'stats', 'engagement'),
+      { totalLikes: increment(1) },
+      { merge: true }
+    ).catch((err) => console.warn('Could not persist love count:', err));
   };
 
   const handleAddWish = (name: string, message: string) => {
-    const newWish: VisitorWish = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    const now = Date.now();
+    const loveForWish = sessionLoveCount;
+    setSessionLoveCount(0);
+
+    addDoc(collection(db, 'wishes'), {
       name,
       message,
-      createdAt: 'Just now',
-    };
-    const next = [newWish, ...wishes];
-    setWishes(next);
-    try {
-      localStorage.setItem('sr_engagement_wishes', JSON.stringify(next));
-    } catch {}
+      loveCount: loveForWish,
+      createdAtMs: now,
+    }).catch((err) => console.warn('Could not save wish:', err));
   };
 
   // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & Aggressive Autoplay

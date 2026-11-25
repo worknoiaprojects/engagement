@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
 import confetti from 'canvas-confetti';
 import { MapPin, Download, Share2, Heart, X } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface PendingAction {
   type: 'directions' | 'share' | 'download';
@@ -23,6 +19,7 @@ export const CinematicScroller: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const finalCardRef = useRef<HTMLImageElement | null>(null);
+  const qrHotspotRef = useRef<HTMLButtonElement | null>(null);
   const leftActionsRef = useRef<HTMLDivElement | null>(null);
   const rightActionsRef = useRef<HTMLDivElement | null>(null);
 
@@ -166,31 +163,9 @@ export const CinematicScroller: React.FC = () => {
     };
   }, []);
 
-  // 2. High-Performance Motion Loop (Dual-Frame Blending + Seamless Final Card Merge)
+  // 2. Stationary Viewport + Slow Scroll-Triggered Auto-Play Reveal
   useEffect(() => {
     if (!isLoaded || !canvasRef.current || !containerRef.current || totalFrames === 0) return;
-
-    // A. Smooth momentum scroller for desktop, 100% native touch for mobile
-    const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    let lenis: Lenis | null = null;
-    let tickerFn: ((time: number) => void) | null = null;
-
-    if (!isTouchDevice) {
-      lenis = new Lenis({
-        duration: 1.0,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        smoothWheel: true,
-      });
-
-      lenis.on('scroll', ScrollTrigger.update);
-
-      tickerFn = (time: number) => {
-        lenis?.raf(time * 1000);
-      };
-      gsap.ticker.add(tickerFn);
-      gsap.ticker.lagSmoothing(0);
-    }
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -198,18 +173,12 @@ export const CinematicScroller: React.FC = () => {
 
     const playhead = { frame: 0 };
 
-    // B. Crystal Clear 100% Native Edge-to-Edge Buffer
+    // B. Crystal Clear 100% Native Edge-to-Edge Buffer (Stationary Viewport)
     const resizeCanvas = () => {
       if (!containerRef.current || !canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const w = containerRef.current.clientWidth || window.innerWidth;
-      const maxH = Math.max(
-        window.innerHeight,
-        containerRef.current.clientHeight,
-        typeof screen !== 'undefined' ? screen.availHeight : 0,
-        typeof screen !== 'undefined' ? screen.height : 0
-      );
-      const h = maxH || window.innerHeight;
+      const h = containerRef.current.clientHeight || window.innerHeight;
 
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
@@ -236,10 +205,9 @@ export const CinematicScroller: React.FC = () => {
       ctx.fillStyle = '#0b0314';
       ctx.fillRect(0, 0, cw, ch);
 
-      // Full edge-to-edge cover positioning with 8% height zoom (Guarantees ZERO black screen at bottom)
-      const zoom = 1.08;
-      const hRatio = (cw / imgA.width) * zoom;
-      const vRatio = (ch / imgA.height) * zoom;
+      // Full edge-to-edge cover positioning
+      const hRatio = cw / imgA.width;
+      const vRatio = ch / imgA.height;
       const ratio = Math.max(hRatio, vRatio);
       const drawW = imgA.width * ratio;
       const drawH = imgA.height * ratio;
@@ -260,42 +228,19 @@ export const CinematicScroller: React.FC = () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Initial first-frame render
+    // Initial first-frame render (sealed envelope)
     render(0);
 
-    // D. Master Cinematic Scroll Timeline (Interactive Scroll-Driven Scrubbing)
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top top',
-        end: '+=400%',
-        pin: true,
-        scrub: 0.25,
-        onUpdate: (self) => {
-          // Trigger celebratory petals once when reaching the final merged card
-          if (self.progress > 0.88 && !hasCelebratedRef.current) {
-            hasCelebratedRef.current = true;
-            confetti({
-              particleCount: 50,
-              spread: 75,
-              origin: { y: 0.85 },
-              colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#f3e8ff', '#fef08a'],
-              disableForReducedMotion: true,
-            });
-          } else if (self.progress < 0.75) {
-            hasCelebratedRef.current = false;
-          }
-        },
-      },
-    });
+    // D. Paused Cinematic Reveal Timeline (Starts slowly on first scroll/swipe)
+    const tl = gsap.timeline({ paused: true });
 
-    // 1. Video frames scrub through the entire animated invitation
+    // 1. Slow, graceful video playback through all frames
     tl.to(
       playhead,
       {
         frame: totalFrames - 1,
-        ease: 'none',
-        duration: 3.2,
+        ease: 'power1.inOut',
+        duration: 9.5,
         onUpdate: () => {
           render(playhead.frame);
         },
@@ -311,13 +256,35 @@ export const CinematicScroller: React.FC = () => {
         {
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 0.85,
+          duration: 1.8,
         },
-        2.55
+        7.8
       );
     }
 
-    // 3. Side Floating Buttons glide in when invitation is fully merged
+    // 3. Celebratory petals when the final card is revealed
+    tl.call(
+      () => {
+        if (!hasCelebratedRef.current) {
+          hasCelebratedRef.current = true;
+          confetti({
+            particleCount: 50,
+            spread: 75,
+            origin: { y: 0.85 },
+            colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#f3e8ff', '#fef08a'],
+            disableForReducedMotion: true,
+          });
+        }
+      },
+      [],
+      8.6
+    );
+
+    // 4. Enable QR hotspot & glide in side floating buttons at card reveal
+    if (qrHotspotRef.current) {
+      tl.set(qrHotspotRef.current, { pointerEvents: 'auto' }, 9.2);
+    }
+
     if (leftActionsRef.current) {
       tl.fromTo(
         leftActionsRef.current,
@@ -327,9 +294,9 @@ export const CinematicScroller: React.FC = () => {
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 0.55,
+          duration: 0.9,
         },
-        3.35
+        9.2
       );
     }
 
@@ -342,20 +309,39 @@ export const CinematicScroller: React.FC = () => {
           x: 0,
           pointerEvents: 'auto',
           ease: 'power2.out',
-          duration: 0.55,
+          duration: 0.9,
         },
-        3.35
+        9.2
       );
     }
 
-    // Refresh ScrollTrigger to ensure bounds align with locked mobile dimensions
-    ScrollTrigger.refresh();
+    // Trigger slow auto-play once on user's first scroll, swipe, or tap
+    let hasStarted = false;
+    const triggerAutoPlay = () => {
+      unlockAndPlay();
+      if (hasStarted) return;
+      hasStarted = true;
+      tl.play();
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'Space', 'PageDown', 'Enter'].includes(e.code)) {
+        triggerAutoPlay();
+      }
+    };
+
+    const triggerEvents = ['wheel', 'touchmove', 'touchend', 'click', 'pointerdown'] as const;
+    triggerEvents.forEach((ev) => {
+      window.addEventListener(ev, triggerAutoPlay, { passive: true });
+    });
+    window.addEventListener('keydown', onKeyDown, { passive: true });
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      if (tickerFn) gsap.ticker.remove(tickerFn);
-      if (lenis) lenis.destroy();
+      triggerEvents.forEach((ev) => {
+        window.removeEventListener(ev, triggerAutoPlay);
+      });
+      window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', resizeCanvas);
     };
   }, [isLoaded, totalFrames]);
@@ -581,7 +567,7 @@ export const CinematicScroller: React.FC = () => {
   };
 
   return (
-    <div className="relative bg-[#0b0314] text-[#2b0b3f] min-h-screen w-full">
+    <div className="relative bg-[#0b0314] text-[#2b0b3f] h-[100dvh] w-full overflow-hidden">
       {/* 
         Luxury Shimmer Loading Overlay
         Featuring Shimmering Names "SUVARNA ❤️ RAJESH" with Radiant Heart Love Icon
@@ -619,17 +605,12 @@ export const CinematicScroller: React.FC = () => {
       )}
 
       {/* 
-        Full-Screen Viewport (Mobile-Locked Format, Max 440px on Desktop)
-        ZERO white lines, 100% full-bleed edge-to-edge on mobile with 100lvh height
+        Stationary Full-Screen Viewport (Mobile-Locked Format, Max 440px on Desktop)
+        Frame holder never moves or changes size on scroll
       */}
       <div
         ref={containerRef}
-        style={{
-          touchAction: 'pan-y',
-          height: '100lvh',
-          minHeight: '100dvh',
-        }}
-        className="relative w-full max-w-[440px] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
+        className="relative w-full max-w-[440px] h-[100dvh] overflow-hidden bg-[#0b0314] shadow-[0_0_80px_rgba(0,0,0,0.85)] select-none mx-auto"
       >
         {/* Continuous Background Music Stream (Dual Native AAC & MP3 for 100% Mobile Compatibility) */}
         <audio
@@ -650,31 +631,30 @@ export const CinematicScroller: React.FC = () => {
           />
         )}
 
-        {/* Full-Screen Video Canvas (Edge-to-Edge with 8% Height Zoom Overfill) */}
+        {/* Full-Screen Video Canvas (Stationary Edge-to-Edge) */}
         <canvas
           ref={canvasRef}
-          style={{ height: '100lvh', minHeight: '100%' }}
-          className="absolute inset-0 w-full h-full object-cover block pointer-events-none scale-[1.08] origin-center"
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none"
         />
 
         {/* 
-          High-Resolution Final Merged Card Image (Edge-to-Edge with 8% Height Zoom Overfill)
+          High-Resolution Final Merged Card Image (Stationary Edge-to-Edge)
           Crossfades smoothly over the canvas when the video animation completes
         */}
         <img
           ref={finalCardRef}
           src="/images/final_card_1080.webp"
           alt="Engagement Invitation - Suvarna & Rajesh"
-          style={{ height: '100lvh', minHeight: '100%' }}
-          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 will-change-opacity select-none scale-[1.08] origin-center"
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 will-change-opacity select-none"
         />
 
         {/* QR Code Touch Hotspot (Opens Directions to Vemulawada) */}
         <button
+          ref={qrHotspotRef}
           type="button"
           onClick={(e) => triggerActionWithModal('directions', e)}
           title="Click to find venue directions on Google Maps"
-          className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-48 h-32 z-20 cursor-pointer rounded-2xl focus:outline-none transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex items-center justify-center pointer-events-auto"
+          className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-48 h-32 z-20 cursor-pointer rounded-2xl focus:outline-none transition-opacity opacity-0 hover:opacity-100 bg-purple-500/10 flex items-center justify-center pointer-events-none"
         />
 
 

@@ -204,15 +204,16 @@ export const CinematicScroller: React.FC = () => {
 
     const playhead = { frame: 0 };
 
-    // B. Crystal Clear 100% Native Edge-to-Edge Buffer (Stationary Viewport)
+    // B. Crystal Clear 100% Native 1080p+ Edge-to-Edge Buffer (Never downscale below 1080x1920)
     const resizeCanvas = () => {
       if (!containerRef.current || !canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const w = containerRef.current.clientWidth || window.innerWidth;
       const h = containerRef.current.clientHeight || window.innerHeight;
+      const scale = Math.max(dpr, 1080 / Math.max(w, 1), 1920 / Math.max(h, 1));
 
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       render(playhead.frame);
@@ -703,7 +704,10 @@ export const CinematicScroller: React.FC = () => {
           ref={finalCardRef}
           src="/images/final_card_1080.webp"
           alt="Engagement Invitation - Suvarna & Rajesh"
-          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 will-change-opacity select-none"
+          decoding="sync"
+          loading="eager"
+          fetchPriority="high"
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none opacity-0 z-10 select-none"
         />
 
         {/* QR Code Touch Hotspot (Opens Directions to Vemulawada) */}

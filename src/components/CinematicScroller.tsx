@@ -24,9 +24,11 @@ export const CinematicScroller: React.FC = () => {
   const rightActionsRef = useRef<HTMLDivElement | null>(null);
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const [totalFrames, setTotalFrames] = useState(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const hasCelebratedRef = useRef(false);
+  const openTriggerRef = useRef<(() => void) | null>(null);
 
   // Background Music (SVSC Title BGM Loop) State
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -344,14 +346,16 @@ export const CinematicScroller: React.FC = () => {
       );
     }
 
-    // Trigger slow auto-play once on user's first scroll, swipe, or tap
+    // Trigger slow auto-play once on user's first scroll, swipe, or seal tap
     let hasStarted = false;
     const triggerAutoPlay = () => {
       unlockAndPlay();
       if (hasStarted) return;
       hasStarted = true;
+      setHasOpened(true);
       tl.play();
     };
+    openTriggerRef.current = triggerAutoPlay;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (['ArrowDown', 'Space', 'PageDown', 'Enter'].includes(e.code)) {
@@ -366,6 +370,7 @@ export const CinematicScroller: React.FC = () => {
     window.addEventListener('keydown', onKeyDown, { passive: true });
 
     return () => {
+      openTriggerRef.current = null;
       tl.kill();
       triggerEvents.forEach((ev) => {
         window.removeEventListener(ev, triggerAutoPlay);
@@ -656,10 +661,29 @@ export const CinematicScroller: React.FC = () => {
         {/* Full-Screen First-Tap Audio Unlock Hotspot (Disappears instantly once playing) */}
         {!isAudioPlaying && (
           <div
-            onClick={unlockAndPlay}
+            onClick={() => openTriggerRef.current?.()}
             className="absolute inset-0 z-20 cursor-pointer pointer-events-auto"
           />
         )}
+
+        {/* Opening Liquid Glass Seal Button: Click to Open Invitation & Start Music */}
+        <button
+          type="button"
+          onClick={() => {
+            unlockAndPlay();
+            openTriggerRef.current?.();
+          }}
+          className={`absolute left-1/2 top-[67%] -translate-x-1/2 -translate-y-1/2 z-30 apple-liquid-glass px-5 py-2.5 rounded-full flex items-center gap-2 text-[#2e0854] hover:text-[#7e22ce] shadow-2xl cursor-pointer select-none transition-all duration-700 active:scale-95 whitespace-nowrap ${
+            hasOpened
+              ? 'opacity-0 scale-95 pointer-events-none'
+              : 'opacity-100 scale-100 pointer-events-auto'
+          }`}
+        >
+          <Heart className="w-3.5 h-3.5 text-[#7e22ce] fill-[#7e22ce] animate-pulse" />
+          <span className="text-xs font-sans font-semibold tracking-wide text-[#2e0854]">
+            Tap to Open Invitation
+          </span>
+        </button>
 
         {/* Full-Screen Video Canvas (Stationary Edge-to-Edge) */}
         <canvas

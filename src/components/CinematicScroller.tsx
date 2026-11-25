@@ -456,7 +456,7 @@ export const CinematicScroller: React.FC = () => {
     if (wishesActionRef.current) {
       tl.fromTo(
         wishesActionRef.current,
-        { opacity: 0, y: -16, pointerEvents: 'none' },
+        { opacity: 0, y: 16, pointerEvents: 'none' },
         {
           opacity: 1,
           y: 0,
@@ -892,10 +892,10 @@ export const CinematicScroller: React.FC = () => {
           </button>
         </div>
 
-        {/* End-of-Video Floating Glass Button: Like & Visitor Comments */}
+        {/* End-of-Video Floating Glass Button: Like & Visitor Comments (Bottom-Right) */}
         <div
           ref={wishesActionRef}
-          className="absolute top-4 right-4 z-30 pointer-events-none opacity-0"
+          className="absolute bottom-[10%] right-6 z-30 pointer-events-none opacity-0"
         >
           <button
             type="button"

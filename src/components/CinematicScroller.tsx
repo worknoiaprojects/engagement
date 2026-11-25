@@ -41,12 +41,12 @@ export const CinematicScroller: React.FC = () => {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
 
-  // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & iOS AudioContext Unlock
+  // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & Aggressive Autoplay
   const unlockAndPlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Resume Web Audio AudioContext if available (unlocks iOS silent mode & audio pipeline)
+    // Resume Web Audio AudioContext if available (unlocks iOS audio pipeline)
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
@@ -57,13 +57,16 @@ export const CinematicScroller: React.FC = () => {
       }
     } catch {}
 
+    audio.muted = false;
+    audio.volume = 0.85;
     if (audio.paused) {
-      audio.volume = 0.85;
       audio.play().then(() => {
         setIsAudioPlaying(true);
       }).catch((err) => {
-        console.warn('Awaiting user gesture for audio:', err);
+        console.warn('Awaiting user gesture for unmuted audio:', err);
       });
+    } else {
+      setIsAudioPlaying(true);
     }
   };
 
@@ -71,33 +74,59 @@ export const CinematicScroller: React.FC = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.volume = 0.85;
+    const tryAutoplayUnmuted = () => {
+      audio.muted = false;
+      audio.volume = 0.85;
+      audio.play().then(() => {
+        setIsAudioPlaying(true);
+      }).catch(() => {
+        // Browser blocked unmuted autoplay before gesture: pre-warm muted stream so first interaction unmutes instantaneously
+        audio.muted = true;
+        audio.play().catch(() => {});
+      });
+    };
 
-    // Attempt direct autoplay immediately on mount
-    unlockAndPlay();
+    // Attempt direct unmuted autoplay immediately on mount and once media is ready
+    tryAutoplayUnmuted();
+    audio.addEventListener('canplaythrough', tryAutoplayUnmuted, { once: true });
 
-    // Listen to audio state events
-    const onPlay = () => setIsAudioPlaying(true);
+    // Listen to audio state events (only mark playing once unmuted)
+    const onPlay = () => {
+      if (!audio.muted) setIsAudioPlaying(true);
+    };
     const onPause = () => setIsAudioPlaying(false);
+    const onVolumeChange = () => {
+      if (!audio.paused && !audio.muted) setIsAudioPlaying(true);
+    };
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
+    audio.addEventListener('volumechange', onVolumeChange);
 
-    // Unlock on the very first gesture anywhere on the screen
-    const activationEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'];
+    // Unlock and unmute on the very first gesture anywhere on the screen
+    const activationEvents = ['click', 'touchstart', 'touchend', 'touchmove', 'pointerdown', 'wheel', 'keydown'];
     activationEvents.forEach((ev) => {
       window.addEventListener(ev, unlockAndPlay, { passive: true });
       document.addEventListener(ev, unlockAndPlay, { passive: true });
     });
 
     return () => {
+      audio.removeEventListener('canplaythrough', tryAutoplayUnmuted);
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('volumechange', onVolumeChange);
       activationEvents.forEach((ev) => {
         window.removeEventListener(ev, unlockAndPlay);
         document.removeEventListener(ev, unlockAndPlay);
       });
     };
   }, []);
+
+  // Retry unmuted autoplay once all invitation assets finish loading
+  useEffect(() => {
+    if (isLoaded) {
+      unlockAndPlay();
+    }
+  }, [isLoaded]);
 
   // 2. Fetch manifest & preload all lossless frames + final card image
   useEffect(() => {
@@ -615,6 +644,7 @@ export const CinematicScroller: React.FC = () => {
         {/* Continuous Background Music Stream (Dual Native AAC & MP3 for 100% Mobile Compatibility) */}
         <audio
           ref={audioRef}
+          autoPlay
           loop
           preload="auto"
           playsInline

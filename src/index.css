@@ -407,26 +407,64 @@
 }
 
 .glass-wobble-attention {
-  animation: liquidGlassWobble 2.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  animation: liquidGlassWobble 2.1s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
 }
 
 @keyframes liquidGlassWobble {
   0%, 100% {
-    transform: scale(1, 1) rotate(0deg);
+    transform: scale(1, 1) rotate(0deg) translateY(0px);
   }
   12% {
-    transform: scale(1.1, 0.91) rotate(-4deg);
+    transform: scale(1.13, 0.89) rotate(-6deg) translateY(-2px);
   }
   24% {
-    transform: scale(0.93, 1.09) rotate(4deg);
+    transform: scale(0.91, 1.11) rotate(6deg) translateY(-4px);
   }
   36% {
-    transform: scale(1.06, 0.95) rotate(-2.5deg);
+    transform: scale(1.08, 0.93) rotate(-4deg) translateY(-1px);
   }
   48% {
-    transform: scale(0.97, 1.03) rotate(1.5deg);
+    transform: scale(0.96, 1.05) rotate(2.5deg) translateY(0px);
   }
-  60% {
-    transform: scale(1, 1) rotate(0deg);
+  62% {
+    transform: scale(1, 1) rotate(0deg) translateY(0px);
+  }
+}
+
+.orb-halo-pulse {
+  animation: orbHaloPulse 2.1s ease-out infinite;
+}
+
+@keyframes orbHaloPulse {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.95);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+.orb-mini-flare {
+  animation: orbMiniFlare 2.4s ease-out infinite;
+}
+
+@keyframes orbMiniFlare {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.5) rotate(0deg);
+  }
+  20% {
+    opacity: 0.95;
+    transform: translate3d(var(--orb-x, -6px), -14px, 0) scale(1.05) rotate(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--orb-x, -6px) * 1.6), -46px, 0) scale(0.75) rotate(12deg);
   }
 }

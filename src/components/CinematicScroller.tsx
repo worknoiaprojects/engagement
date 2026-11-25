@@ -965,11 +965,33 @@ export const CinematicScroller: React.FC = () => {
           </button>
         </div>
 
-        {/* End-of-Video Floating Circular Glass Button: Wobbles to Grab Attention */}
+        {/* End-of-Video Floating Circular Glass Button: Wobbles + Ambient Hearts & Halo */}
         <div
           ref={wishesActionRef}
           className="absolute bottom-[9%] right-6 z-30 pointer-events-none opacity-0"
         >
+          {/* Expanding Liquid Glass Halo Ring */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#e9d5ff]/80 bg-[#a855f7]/15 orb-halo-pulse"
+          />
+
+          {/* Ambient Floating Mini Hearts */}
+          <span
+            aria-hidden="true"
+            style={{ '--orb-x': '-8px' } as React.CSSProperties}
+            className="pointer-events-none absolute -top-1 left-2 orb-mini-flare"
+          >
+            <Heart className="w-3 h-3 text-[#f43f5e] fill-[#f43f5e] drop-shadow-sm" />
+          </span>
+          <span
+            aria-hidden="true"
+            style={{ '--orb-x': '7px' } as React.CSSProperties}
+            className="pointer-events-none absolute -top-1 right-3 orb-mini-flare [animation-delay:1.1s]"
+          >
+            <Heart className="w-2.5 h-2.5 text-[#a855f7] fill-[#a855f7] drop-shadow-sm" />
+          </span>
+
           <button
             type="button"
             onClick={handleOpenWishes}
@@ -979,7 +1001,7 @@ export const CinematicScroller: React.FC = () => {
             <div className="relative flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-[#2e0854]" />
               <Heart
-                className={`w-2.5 h-2.5 absolute -top-1 -right-1.5 transition-colors ${
+                className={`w-2.5 h-2.5 absolute -top-1 -right-1.5 animate-pulse transition-colors ${
                   likesCount > 0 ? 'text-[#e11d48] fill-[#e11d48]' : 'text-[#7e22ce] fill-[#7e22ce]'
                 }`}
               />

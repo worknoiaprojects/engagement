@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Heart, MessageCircle, Send, Sparkles, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export interface VisitorWish {
@@ -45,6 +45,9 @@ export const WishesModal: React.FC<WishesModalProps> = ({
   const [message, setMessage] = useState('');
   const [flares, setFlares] = useState<LoveFlare[]>([]);
   const [ringPulse, setRingPulse] = useState(0);
+  const [commentSparks, setCommentSparks] = useState<LoveFlare[]>([]);
+  const [commentCelebrateKey, setCommentCelebrateKey] = useState(0);
+  const sendBtnRef = useRef<HTMLButtonElement | null>(null);
 
   if (!isOpen) return null;
 
@@ -96,13 +99,55 @@ export const WishesModal: React.FC<WishesModalProps> = ({
     onAddWish(trimmedName, trimmedMsg);
     setName('');
     setMessage('');
+    setCommentCelebrateKey((k) => k + 1);
+
+    // Spawn rising golden/purple celebration sparks directly from the comment button
+    const sparkPalette = ['#facc15', '#a855f7', '#ec4899', '#7e22ce', '#fde047'];
+    const sparks: LoveFlare[] = Array.from({ length: 6 }, (_, i) => ({
+      id: Date.now() + Math.random() + i,
+      x: Math.round((Math.random() - 0.5) * 76),
+      rot: Math.round((Math.random() - 0.5) * 60),
+      color: sparkPalette[i % sparkPalette.length],
+      size: 12 + Math.floor(Math.random() * 6),
+    }));
+    setCommentSparks(sparks);
+    setTimeout(() => {
+      const ids = new Set(sparks.map((s) => s.id));
+      setCommentSparks((prev) => prev.filter((s) => !ids.has(s.id)));
+    }, 1150);
+
+    // Launch two-wave celebration confetti directly from the comment button's coordinates
+    const rect = sendBtnRef.current?.getBoundingClientRect();
+    const origin = rect
+      ? {
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight,
+        }
+      : { x: 0.78, y: 0.78 };
+
     confetti({
-      particleCount: 30,
-      spread: 65,
-      origin: { y: 0.6 },
-      colors: ['#7e22ce', '#a855f7', '#d8b4fe', '#fef08a'],
+      particleCount: 38,
+      spread: 80,
+      startVelocity: 34,
+      ticks: 70,
+      origin,
+      colors: ['#facc15', '#9333ea', '#ec4899', '#d8b4fe', '#ffffff'],
       disableForReducedMotion: true,
     });
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 24,
+        angle: 105,
+        spread: 60,
+        startVelocity: 28,
+        ticks: 65,
+        shapes: ['star', 'circle'],
+        origin,
+        colors: ['#fde047', '#a855f7', '#fb7185'],
+        disableForReducedMotion: true,
+      });
+    }, 160);
   };
 
   return (
@@ -257,13 +302,59 @@ export const WishesModal: React.FC<WishesModalProps> = ({
               required
               className="flex-1 px-3.5 py-2 rounded-xl bg-white/90 text-[11.5px] font-sans text-[#2e0854] placeholder:text-[#6b21a8]/45 shadow-[inset_0_1px_4px_rgba(46,8,84,0.08)] focus:outline-none focus:ring-2 focus:ring-[#9333ea]/35 resize-none"
             />
-            <button
-              type="submit"
-              title="Post Blessing"
-              className="h-[46px] px-3.5 rounded-xl bg-gradient-to-br from-[#7e22ce] to-[#581c87] text-white shadow-[0_4px_14px_rgba(88,28,135,0.28)] hover:shadow-[0_6px_18px_rgba(88,28,135,0.36)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </button>
+            <div className="relative shrink-0">
+              {/* Rising Celebration Sparks from Comment Button */}
+              <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 z-30">
+                {commentSparks.map((spark, idx) => (
+                  <span
+                    key={spark.id}
+                    style={
+                      {
+                        '--spark-x': `${spark.x}px`,
+                        '--spark-rot': `${spark.rot}deg`,
+                      } as React.CSSProperties
+                    }
+                    className="absolute -left-2 bottom-0 comment-spark-rise"
+                  >
+                    {idx % 2 === 0 ? (
+                      <Sparkles
+                        style={{ width: `${spark.size}px`, height: `${spark.size}px`, color: spark.color }}
+                      />
+                    ) : (
+                      <Heart
+                        style={{
+                          width: `${spark.size}px`,
+                          height: `${spark.size}px`,
+                          color: spark.color,
+                          fill: spark.color,
+                        }}
+                      />
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              {/* Expanding Golden-Purple Celebration Ring */}
+              {commentCelebrateKey > 0 && (
+                <span
+                  key={commentCelebrateKey}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-[#facc15] love-ring-flare"
+                />
+              )}
+
+              <button
+                ref={sendBtnRef}
+                key={`btn-${commentCelebrateKey}`}
+                type="submit"
+                title="Post Blessing"
+                className={`relative h-[46px] px-3.5 rounded-xl bg-gradient-to-br from-[#9333ea] via-[#7e22ce] to-[#581c87] text-white shadow-[0_4px_16px_rgba(88,28,135,0.34)] hover:shadow-[0_6px_22px_rgba(147,51,234,0.45)] active:scale-95 transition-all flex items-center justify-center cursor-pointer ${
+                  commentCelebrateKey > 0 ? 'comment-btn-celebrate' : ''
+                }`}
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </form>
       </div>

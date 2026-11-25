@@ -24,6 +24,7 @@ export const AdminWishes: React.FC = () => {
   const [wishes, setWishes] = useState<VisitorWish[]>([]);
   const [totalLikes, setTotalLikes] = useState(0);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [dbError, setDbError] = useState('');
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,10 +70,12 @@ export const AdminWishes: React.FC = () => {
     if (!isUnlocked) return;
 
     setIsLoadingData(true);
+    setDbError('');
     const wishesQuery = query(collection(db, 'wishes'), orderBy('createdAtMs', 'desc'));
     const unsubWishes = onSnapshot(
       wishesQuery,
       (snapshot) => {
+        setDbError('');
         const items: VisitorWish[] = snapshot.docs.map((d) => {
           const data = d.data();
           const ts = typeof data.createdAtMs === 'number' ? data.createdAtMs : null;
@@ -94,15 +97,35 @@ export const AdminWishes: React.FC = () => {
         setWishes(items);
         setIsLoadingData(false);
       },
-      () => setIsLoadingData(false)
+      (err) => {
+        setDbError(
+          err?.code === 'permission-denied'
+            ? 'Firestore Rules blocked access. Publish the public read/write rules in Firebase Console.'
+            : 'Unable to sync with Firestore.'
+        );
+        try {
+          const raw = localStorage.getItem('sr_engagement_wishes');
+          if (raw) setWishes(JSON.parse(raw) as VisitorWish[]);
+        } catch {}
+        setIsLoadingData(false);
+      }
     );
 
     const statsRef = doc(db, 'stats', 'engagement');
-    const unsubStats = onSnapshot(statsRef, (snap) => {
-      if (snap.exists()) {
-        setTotalLikes(Number(snap.data()?.totalLikes || 0));
+    const unsubStats = onSnapshot(
+      statsRef,
+      (snap) => {
+        if (snap.exists()) {
+          setTotalLikes(Number(snap.data()?.totalLikes || 0));
+        }
+      },
+      () => {
+        try {
+          const saved = Number(localStorage.getItem('sr_engagement_likes'));
+          if (Number.isFinite(saved) && saved > 0) setTotalLikes(saved);
+        } catch {}
       }
-    });
+    );
 
     return () => {
       unsubWishes();
@@ -219,6 +242,11 @@ export const AdminWishes: React.FC = () => {
 
             {/* Scrollable Wishes List */}
             <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2.5">
+              {dbError && (
+                <div className="p-3 rounded-2xl bg-[#ffe4e6]/95 text-[#9f1239] text-[11px] font-sans leading-relaxed shadow-sm">
+                  {dbError}
+                </div>
+              )}
               {isLoadingData ? (
                 <div className="h-full flex items-center justify-center text-[#d8b4fe]/75 gap-2 text-xs font-sans">
                   <RefreshCw className="w-4 h-4 animate-spin" />

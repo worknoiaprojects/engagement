@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Heart, MessageCircle, Send, Sparkles, X } from 'lucide-react';
+import { Heart, MessageCircle, Send, Sparkles, Star, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export interface VisitorWish {
@@ -101,22 +101,22 @@ export const WishesModal: React.FC<WishesModalProps> = ({
     setMessage('');
     setCommentCelebrateKey((k) => k + 1);
 
-    // Spawn rising golden/purple celebration sparks directly from the comment button
-    const sparkPalette = ['#facc15', '#a855f7', '#ec4899', '#7e22ce', '#fde047'];
-    const sparks: LoveFlare[] = Array.from({ length: 6 }, (_, i) => ({
+    // Spawn 14 rising golden/purple/rose celebration particles directly from the comment button
+    const sparkPalette = ['#facc15', '#a855f7', '#ec4899', '#7e22ce', '#fde047', '#f43f5e'];
+    const sparks: LoveFlare[] = Array.from({ length: 14 }, (_, i) => ({
       id: Date.now() + Math.random() + i,
-      x: Math.round((Math.random() - 0.5) * 76),
-      rot: Math.round((Math.random() - 0.5) * 60),
+      x: Math.round((Math.random() - 0.5) * 130),
+      rot: Math.round((Math.random() - 0.5) * 90),
       color: sparkPalette[i % sparkPalette.length],
-      size: 12 + Math.floor(Math.random() * 6),
+      size: 11 + Math.floor(Math.random() * 9),
     }));
     setCommentSparks(sparks);
     setTimeout(() => {
       const ids = new Set(sparks.map((s) => s.id));
       setCommentSparks((prev) => prev.filter((s) => !ids.has(s.id)));
-    }, 1150);
+    }, 1200);
 
-    // Launch two-wave celebration confetti directly from the comment button's coordinates
+    // Launch 4-wave fireworks celebration confetti directly from the comment button's coordinates
     const rect = sendBtnRef.current?.getBoundingClientRect();
     const origin = rect
       ? {
@@ -125,29 +125,71 @@ export const WishesModal: React.FC<WishesModalProps> = ({
         }
       : { x: 0.78, y: 0.78 };
 
+    // Wave 1: Main starburst
     confetti({
-      particleCount: 38,
-      spread: 80,
-      startVelocity: 34,
-      ticks: 70,
+      particleCount: 55,
+      spread: 100,
+      startVelocity: 40,
+      ticks: 80,
       origin,
       colors: ['#facc15', '#9333ea', '#ec4899', '#d8b4fe', '#ffffff'],
       disableForReducedMotion: true,
     });
 
+    // Wave 2: Twin angled cannons
     setTimeout(() => {
       confetti({
-        particleCount: 24,
-        angle: 105,
-        spread: 60,
-        startVelocity: 28,
-        ticks: 65,
+        particleCount: 30,
+        angle: 118,
+        spread: 55,
+        startVelocity: 36,
+        ticks: 75,
         shapes: ['star', 'circle'],
         origin,
         colors: ['#fde047', '#a855f7', '#fb7185'],
         disableForReducedMotion: true,
       });
-    }, 160);
+      confetti({
+        particleCount: 30,
+        angle: 68,
+        spread: 55,
+        startVelocity: 36,
+        ticks: 75,
+        shapes: ['star', 'circle'],
+        origin,
+        colors: ['#facc15', '#c084fc', '#f43f5e'],
+        disableForReducedMotion: true,
+      });
+    }, 140);
+
+    // Wave 3: High-arcing golden shimmer shower
+    setTimeout(() => {
+      confetti({
+        particleCount: 36,
+        spread: 85,
+        startVelocity: 45,
+        scalar: 1.05,
+        ticks: 85,
+        shapes: ['star'],
+        origin,
+        colors: ['#facc15', '#fef08a', '#e9d5ff', '#ec4899'],
+        disableForReducedMotion: true,
+      });
+    }, 320);
+
+    // Wave 4: Floating petal afterglow
+    setTimeout(() => {
+      confetti({
+        particleCount: 26,
+        spread: 110,
+        startVelocity: 24,
+        gravity: 0.6,
+        ticks: 90,
+        origin,
+        colors: ['#d8b4fe', '#fbcfe8', '#fef08a', '#a855f7'],
+        disableForReducedMotion: true,
+      });
+    }, 520);
   };
 
   return (
@@ -316,11 +358,12 @@ export const WishesModal: React.FC<WishesModalProps> = ({
                     }
                     className="absolute -left-2 bottom-0 comment-spark-rise"
                   >
-                    {idx % 2 === 0 ? (
+                    {idx % 3 === 0 ? (
                       <Sparkles
                         style={{ width: `${spark.size}px`, height: `${spark.size}px`, color: spark.color }}
+                        className="drop-shadow-sm"
                       />
-                    ) : (
+                    ) : idx % 3 === 1 ? (
                       <Heart
                         style={{
                           width: `${spark.size}px`,
@@ -328,19 +371,39 @@ export const WishesModal: React.FC<WishesModalProps> = ({
                           color: spark.color,
                           fill: spark.color,
                         }}
+                        className="drop-shadow-sm"
+                      />
+                    ) : (
+                      <Star
+                        style={{
+                          width: `${spark.size}px`,
+                          height: `${spark.size}px`,
+                          color: spark.color,
+                          fill: spark.color,
+                        }}
+                        className="drop-shadow-sm"
                       />
                     )}
                   </span>
                 ))}
               </div>
 
-              {/* Expanding Golden-Purple Celebration Ring */}
+              {/* Triple Staggered Celebration Shockwave Rings */}
               {commentCelebrateKey > 0 && (
-                <span
-                  key={commentCelebrateKey}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-[#facc15] love-ring-flare"
-                />
+                <React.Fragment key={commentCelebrateKey}>
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-[#facc15] love-ring-flare"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-[#ec4899] love-ring-flare [animation-delay:110ms]"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-[#a855f7] love-ring-flare [animation-delay:220ms]"
+                  />
+                </React.Fragment>
               )}
 
               <button
@@ -348,7 +411,7 @@ export const WishesModal: React.FC<WishesModalProps> = ({
                 key={`btn-${commentCelebrateKey}`}
                 type="submit"
                 title="Post Blessing"
-                className={`relative h-[46px] px-3.5 rounded-xl bg-gradient-to-br from-[#9333ea] via-[#7e22ce] to-[#581c87] text-white shadow-[0_4px_16px_rgba(88,28,135,0.34)] hover:shadow-[0_6px_22px_rgba(147,51,234,0.45)] active:scale-95 transition-all flex items-center justify-center cursor-pointer ${
+                className={`comment-btn-sheen relative h-[46px] px-3.5 rounded-xl bg-gradient-to-br from-[#a855f7] via-[#7e22ce] to-[#ec4899] text-white shadow-[0_4px_16px_rgba(88,28,135,0.34)] hover:shadow-[0_6px_22px_rgba(147,51,234,0.45)] active:scale-95 transition-all flex items-center justify-center cursor-pointer ${
                   commentCelebrateKey > 0 ? 'comment-btn-celebrate' : ''
                 }`}
               >

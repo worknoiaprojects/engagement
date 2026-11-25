@@ -497,12 +497,26 @@
     opacity: 0;
     transform: translate3d(0, 0, 0) scale(0.3) rotate(0deg);
   }
-  20% {
+  18% {
     opacity: 1;
-    transform: translate3d(calc(var(--spark-x, 0px) * 0.45), -24px, 0) scale(1.25) rotate(var(--spark-rot, 18deg));
+    transform: translate3d(calc(var(--spark-x, 0px) * 0.45), -36px, 0) scale(1.35) rotate(var(--spark-rot, 18deg));
   }
   100% {
     opacity: 0;
-    transform: translate3d(var(--spark-x, 0px), -96px, 0) scale(0.7) rotate(calc(var(--spark-rot, 18deg) * 2));
+    transform: translate3d(var(--spark-x, 0px), -148px, 0) scale(0.75) rotate(calc(var(--spark-rot, 18deg) * 2.4));
+  }
+}
+
+.comment-btn-sheen {
+  background-size: 200% 200%;
+  animation: commentBtnSheen 3.2s ease infinite;
+}
+
+@keyframes commentBtnSheen {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
 }

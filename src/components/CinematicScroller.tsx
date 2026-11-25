@@ -45,6 +45,7 @@ export const CinematicScroller: React.FC = () => {
 
   // Background Music (SVSC Title BGM Loop) State
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   // Heartfelt Action Confirmation Modal State
@@ -56,13 +57,27 @@ export const CinematicScroller: React.FC = () => {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<{ x: number; y: number } | null>(null);
 
-  // Visitor Likes & Wishes Modal State (Synced Live with Firebase Firestore)
+  // Visitor Likes & Wishes Modal State (Synced Live with Firebase Firestore + Local Fallback)
   const [isWishesOpen, setIsWishesOpen] = useState(false);
   const [isWishesClosing, setIsWishesClosing] = useState(false);
   const [wishesOrigin, setWishesOrigin] = useState<{ x: number; y: number } | null>(null);
-  const [likesCount, setLikesCount] = useState<number>(0);
+  const [likesCount, setLikesCount] = useState<number>(() => {
+    try {
+      const saved = Number(localStorage.getItem('sr_engagement_likes'));
+      return Number.isFinite(saved) && saved > 0 ? saved : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [sessionLoveCount, setSessionLoveCount] = useState<number>(0);
-  const [wishes, setWishes] = useState<VisitorWish[]>([]);
+  const [wishes, setWishes] = useState<VisitorWish[]>(() => {
+    try {
+      const raw = localStorage.getItem('sr_engagement_wishes');
+      return raw ? (JSON.parse(raw) as VisitorWish[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     const wishesQuery = query(collection(db, 'wishes'), orderBy('createdAtMs', 'desc'));
@@ -130,7 +145,13 @@ export const CinematicScroller: React.FC = () => {
   };
 
   const handleSendLove = () => {
-    setLikesCount((prev) => prev + 1);
+    setLikesCount((prev) => {
+      const next = prev + 1;
+      try {
+        localStorage.setItem('sr_engagement_likes', String(next));
+      } catch {}
+      return next;
+    });
     setSessionLoveCount((prev) => prev + 1);
     setDoc(
       doc(db, 'stats', 'engagement'),
@@ -144,6 +165,22 @@ export const CinematicScroller: React.FC = () => {
     const loveForWish = sessionLoveCount;
     setSessionLoveCount(0);
 
+    const localWish: VisitorWish = {
+      id: `${now}-${Math.random().toString(36).slice(2, 7)}`,
+      name,
+      message,
+      loveCount: loveForWish,
+      createdAt: 'Just now',
+    };
+
+    setWishes((prev) => {
+      const next = [localWish, ...prev];
+      try {
+        localStorage.setItem('sr_engagement_wishes', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
     addDoc(collection(db, 'wishes'), {
       name,
       message,
@@ -152,18 +189,20 @@ export const CinematicScroller: React.FC = () => {
     }).catch((err) => console.warn('Could not save wish:', err));
   };
 
-  // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & Aggressive Autoplay
+  // 1. Continuous Background Music (SVSC Title BGM) with Multi-Format Support & Single AudioContext Unlock
   const unlockAndPlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Resume Web Audio AudioContext if available (unlocks iOS audio pipeline)
+    // Reuse a single AudioContext instance (prevents browser limit errors on repeated gestures)
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
-        const ctx = new AudioCtx();
-        if (ctx.state === 'suspended') {
-          ctx.resume();
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioCtx();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+          audioCtxRef.current.resume().catch(() => {});
         }
       }
     } catch {}

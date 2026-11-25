@@ -168,9 +168,15 @@ export const WishesModal: React.FC<WishesModalProps> = ({
                     <span className="text-[11px] font-sans font-semibold text-[#2e0854] truncate">
                       {wish.name}
                     </span>
-                    <span className="text-[9px] font-sans text-[#7e22ce]/70 shrink-0">
-                      {wish.createdAt}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffe4e6] text-[#e11d48] text-[9.5px] font-sans font-bold">
+                        <Heart className="w-2.5 h-2.5 fill-[#e11d48] text-[#e11d48]" />
+                        {wish.loveCount ?? 0}
+                      </span>
+                      <span className="text-[9px] font-sans text-[#7e22ce]/70">
+                        {wish.createdAt}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-[11.5px] font-sans text-[#4c1d95] leading-relaxed break-words">
                     {wish.message}
